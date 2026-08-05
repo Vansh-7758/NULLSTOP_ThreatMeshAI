@@ -1,0 +1,78 @@
+// Shared Framer Motion animation variants
+// Used across all section components for consistency
+
+/** Fade up with slight vertical travel */
+export const fadeUp = {
+  hidden: { opacity: 0, y: 36 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/** Fade in without movement */
+export const fadeIn = {
+  hidden: { opacity: 0 },
+  show:   { opacity: 1, transition: { duration: 0.55, ease: 'easeInOut' } },
+};
+
+/** Scale in from slightly small */
+export const scaleIn = {
+  hidden: { opacity: 0, scale: 0.92 },
+  show:   { opacity: 1, scale: 1, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/** Slide in from left */
+export const slideLeft = {
+  hidden: { opacity: 0, x: -48 },
+  show:   { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/** Slide in from right */
+export const slideRight = {
+  hidden: { opacity: 0, x: 48 },
+  show:   { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/** Stagger container — wraps children with stagger delay */
+export const stagger = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.10,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+/** Faster stagger for dense grids */
+export const staggerFast = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.07,
+      delayChildren: 0.0,
+    },
+  },
+};
+
+/** Slow stagger for big reveals */
+export const staggerSlow = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.14,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+/** Hover lift spring */
+export const hoverLift = {
+  rest:  { y: 0,  scale: 1,    transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
+  hover: { y: -6, scale: 1.01, transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] } },
+};
+
+/** Viewport trigger helper — reuse as whileInView prop */
+export const inViewProps = {
+  initial: 'hidden',
+  whileInView: 'show',
+  viewport: { once: true, amount: 0.15 },
+};

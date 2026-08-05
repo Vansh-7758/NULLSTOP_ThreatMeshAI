@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ThreatMesh WATCH | Supply Chain Monitor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&family=Space+Grotesk:wght@100..900&display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --primary-glow: rgba(124, 58, 237, 0.8);
+            --danger-glow: rgba(239, 68, 68, 0.8);
+            --warning-glow: rgba(245, 158, 11, 0.8);
+        }
+        body {
+            background-color: #09090F;
+            color: #E4E1EA;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid #1E1E3A;
+        }
+        .border-glow-purple {
+            border: 1px solid #7C3AED;
+            box-shadow: inset 0 0 12px rgba(124, 58, 237, 0.2), 0 0 10px rgba(124, 58, 237, 0.1);
+        }
+        .border-glow-red {
+            border: 1px solid #EF4444;
+            box-shadow: inset 0 0 12px rgba(239, 68, 68, 0.2);
+        }
+        .terminal-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+        .terminal-scroll::-webkit-scrollbar-thumb {
+            background: #1E1E3A;
+            border-radius: 10px;
+        }
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+        .animate-pulse-red {
+            animation: pulse-red 2s infinite ease-in-out;
+        }
+        @keyframes dash-move {
+            to { stroke-dashoffset: -20; }
+        }
+        .animated-edge {
+            stroke-dasharray: 5;
+            animation: dash-move 1s linear infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#d2bbff",
+                        "primary-container": "#7c3aed",
+                        "on-primary-container": "#ede0ff",
+                        "surface": "#131319",
+                        "surface-container": "#1f1f26",
+                        "surface-container-lowest": "#0e0e14",
+                        "outline-variant": "#4a4455",
+                        "on-surface": "#e4e1ea",
+                        "on-surface-variant": "#ccc3d8",
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    spacing: {
+                        "unit": "4px",
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-page": "24px",
+                        "gutter": "16px",
+                        "panel-padding": "12px"
+                    },
+                    fontFamily: {
+                        "display-lg": ["Space Grotesk"],
+                        "headline-sm": ["Space Grotesk"],
+                        "headline-md": ["Space Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "data-mono": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex h-screen w-screen bg-[#09090F]">
+<!-- Sidebar (Left) -->
+<aside class="w-[240px] h-full flex flex-col bg-[#0F0F1A] border-r border-outline-variant/30 shrink-0">
+<!-- Brand/Header -->
+<div class="p-panel-padding flex flex-col gap-unit border-b border-outline-variant/20 mb-stack-md">
+<span class="font-display-lg text-primary text-[20px] font-bold tracking-tight">THREATMESH</span>
+<div class="mt-stack-sm p-unit bg-surface-container-lowest border border-outline-variant/30 rounded">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-1 uppercase">Scan Metadata</p>
+<p class="font-data-mono text-[12px] text-primary">ID: SM-8829-ALPHA</p>
+<p class="font-data-mono text-[11px] text-on-surface-variant opacity-70">2023-10-24 14:02:11</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_5px_rgba(34,197,94,0.6)]"></span>
+<span class="font-label-caps text-[10px] text-green-500">SYSTEM_NOMINAL</span>
+</div>
+</div>
+</div>
+<!-- Navigation -->
+<nav class="flex-1 px-panel-padding space-y-1">
+<a class="flex items-center gap-stack-sm px-stack-sm py-2 bg-primary-container text-on-primary-container rounded-lg transition-all duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-label-caps text-[11px]">Dependency Graph</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-sm py-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">lan</span>
+<span class="font-label-caps text-[11px]">Attack Paths</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-sm py-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+<span class="font-label-caps text-[11px]">Predicted Risks</span>
+</a>
+<a class="flex items-center gap-stack-sm px-stack-sm py-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">description</span>
+<span class="font-label-caps text-[11px]">Playbooks</span>
+</a>
+</nav>
+<!-- Cyber Health Score Gauge -->
+<div class="p-panel-padding mt-auto">
+<div class="bg-surface-container-lowest/50 border border-outline-variant/20 rounded-xl p-stack-md flex flex-col items-center">
+<p class="font-label-caps text-[10px] text-on-surface-variant mb-stack-md uppercase tracking-widest text-center">Health Index</p>
+<div class="relative w-28 h-28 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container" cx="56" cy="56" fill="transparent" r="48" stroke="currentColor" stroke-width="6"></circle>
+<circle class="text-primary-container" cx="56" cy="56" fill="transparent" r="48" stroke="currentColor" stroke-dasharray="301.59" stroke-dashoffset="60.3" stroke-width="6" style="filter: drop-shadow(0 0 4px var(--primary-glow));"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-data-mono font-bold text-[28px] text-white">82</span>
+<span class="font-label-caps text-[10px] text-primary/60">ALPHA-9</span>
+</div>
+</div>
+<button class="mt-stack-md w-full bg-primary-container hover:bg-primary-container/80 text-on-primary-container py-2 rounded font-label-caps text-[11px] transition-all">
+                    INITIALIZE SCAN
+                </button>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 relative">
+<!-- Top Bar -->
+<header class="h-16 flex items-center justify-between px-margin-page border-b border-outline-variant/30 bg-surface/40 backdrop-blur-md">
+<div class="flex items-center gap-stack-md">
+<h1 class="font-headline-md text-white text-[24px]">WATCH — Supply Chain Monitor</h1>
+<div class="flex items-center gap-2 px-2 py-0.5 rounded bg-red-950/30 border border-red-500/50">
+<span class="w-2 h-2 rounded-full bg-red-500 animate-pulse-red"></span>
+<span class="font-label-caps text-[10px] text-red-500 font-bold">LIVE</span>
+</div>
+</div>
+<div class="flex items-center gap-stack-md">
+<div class="relative group">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">settings</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-primary/40">
+<img class="w-full h-full object-cover" data-alt="Close-up professional portrait of a cybersecurity analyst wearing a tactical headset in a dimly lit server room. High-contrast lighting with purple and blue rim lights reflecting off the equipment and the analyst's profile. Hyper-realistic style with focus on texture and sharp details to fit a high-tech security operations center aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU8rNpKC1wulpVs5RCzS_ylPLQ7sqUyPCKkVebMVlIzoywsQMvwGTPJFhPCULmAzMSIkowmQhUDP0f6jvHykS99nuK13-lonDek-edbi1OcsTSStoAhn96P88_XDdFeE-9YQEreoi5I1unVs-iry12oMrsVa2ebilPqkkQjDuAf_lmAVm0U3BN4kkBQ5xgu3E3Jb6ur4kZGupGiatFgHvPelEMagbc5JKGJgvd_O9gOfy8z4lM5JTn"/>
+</div>
+</div>
+</header>
+<!-- Dashboard Body -->
+<div class="flex-1 overflow-y-auto p-margin-page custom-scroll">
+<!-- Stat Grid -->
+<div class="grid grid-cols-3 gap-gutter mb-stack-lg">
+<div class="border-glow-purple bg-[#0F0F1A] p-stack-md rounded-lg relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-primary-container"></div>
+<p class="font-label-caps text-[11px] text-on-surface-variant opacity-60">DEPENDENCY COUNT</p>
+<div class="flex items-baseline gap-2 mt-stack-sm">
+<h2 class="font-data-mono font-bold text-[32px] text-white">1,248</h2>
+<span class="text-green-500 text-[12px] font-data-mono">+12</span>
+</div>
+</div>
+<div class="border-glow-purple bg-[#0F0F1A]/80 p-stack-md rounded-lg relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-primary"></div>
+<p class="font-label-caps text-[11px] text-on-surface-variant opacity-60">ACTIVE VULNERABILITIES</p>
+<div class="flex items-baseline gap-2 mt-stack-sm">
+<h2 class="font-data-mono font-bold text-[32px] text-white">42</h2>
+<span class="text-red-500 text-[12px] font-data-mono">HIGH RISK</span>
+</div>
+</div>
+<div class="border border-outline-variant bg-[#0F0F1A]/50 p-stack-md rounded-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-outline-variant"></div>
+<p class="font-label-caps text-[11px] text-on-surface-variant opacity-60">UPSTREAM INTEGRITY</p>
+<div class="flex items-baseline gap-2 mt-stack-sm">
+<h2 class="font-data-mono font-bold text-[32px] text-white">99.4%</h2>
+<span class="text-primary text-[12px] font-data-mono">VERIFIED</span>
+</div>
+</div>
+</div>
+<!-- Dependency Graph Container -->
+<div class="relative w-full h-[500px] bg-[#09090F] rounded-xl border border-outline-variant/30 overflow-hidden flex items-center justify-center">
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(circle at 2px 2px, #4a4455 1px, transparent 0); background-size: 32px 32px;"></div>
+<!-- Mock SVG Graph -->
+<svg class="absolute inset-0 w-full h-full">
+<!-- Connections -->
+<path d="M 200 250 L 400 150" fill="none" opacity="0.4" stroke="#7C3AED" stroke-width="1.5"></path>
+<path class="animated-edge" d="M 200 250 L 400 350" fill="none" stroke="#EF4444" stroke-width="2"></path>
+<path d="M 400 150 L 650 250" fill="none" opacity="0.4" stroke="#7C3AED" stroke-width="1.5"></path>
+<path d="M 400 350 L 650 250" fill="none" opacity="0.4" stroke="#F59E0B" stroke-width="1.5"></path>
+<!-- Nodes represented by ForeignObjects -->
+<foreignobject height="80" width="180" x="110" y="210">
+<div class="border-glow-purple bg-surface-container p-stack-sm rounded-lg flex flex-col justify-between h-full hover:scale-105 transition-transform cursor-pointer">
+<span class="font-label-caps text-[10px] text-on-surface-variant">GATEWAY_CORE</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[14px] text-white">v2.4.1</span>
+<span class="text-primary font-bold text-[14px]">88</span>
+</div>
+</div>
+</foreignobject>
+<foreignobject height="80" width="180" x="310" y="110">
+<div class="border-glow-purple bg-surface-container p-stack-sm rounded-lg flex flex-col justify-between h-full hover:scale-105 transition-transform cursor-pointer">
+<span class="font-label-caps text-[10px] text-on-surface-variant">AUTH_SVC_LIB</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[14px] text-white">v1.0.8</span>
+<span class="text-primary font-bold text-[14px]">92</span>
+</div>
+</div>
+</foreignobject>
+<foreignobject height="80" width="180" x="310" y="310">
+<div class="border-glow-red bg-surface-container p-stack-sm rounded-lg flex flex-col justify-between h-full hover:scale-105 transition-transform cursor-pointer">
+<span class="font-label-caps text-[10px] text-red-400">UNTRUSTED_DEP</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[14px] text-red-500">v0.9.2-beta</span>
+<span class="text-red-500 font-bold text-[14px]">32</span>
+</div>
+</div>
+</foreignobject>
+<foreignobject height="80" width="180" x="560" y="210">
+<div class="border border-warning-glow/50 bg-surface-container p-stack-sm rounded-lg flex flex-col justify-between h-full hover:scale-105 transition-transform cursor-pointer" style="border-color: #F59E0B; box-shadow: inset 0 0 8px rgba(245, 158, 11, 0.1);">
+<span class="font-label-caps text-[10px] text-on-surface-variant">LOGGER_PROXY</span>
+<div class="flex justify-between items-end">
+<span class="font-data-mono text-[14px] text-white">v3.1.0</span>
+<span class="text-amber-500 font-bold text-[14px]">67</span>
+</div>
+</div>
+</foreignobject>
+</svg>
+<!-- UI Overlays for Graph -->
+<div class="absolute bottom-stack-md right-stack-md flex gap-2">
+<button class="w-8 h-8 rounded bg-surface border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-[18px]">add</span></button>
+<button class="w-8 h-8 rounded bg-surface border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-[18px]">remove</span></button>
+<button class="w-8 h-8 rounded bg-surface border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-white"><span class="material-symbols-outlined text-[18px]">center_focus_strong</span></button>
+</div>
+</div>
+</div>
+<!-- Attack Replay Timeline (Bottom Overlay) -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-[80%] glass-panel rounded-full px-12 py-4 border border-outline-variant/20 flex items-center justify-between shadow-2xl">
+<div class="flex items-center gap-stack-md shrink-0">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">play_circle</span>
+<span class="font-label-caps text-[11px] text-white/80">REPLAY TIMELINE</span>
+</div>
+<div class="flex-1 px-stack-lg relative flex items-center">
+<!-- Progress Line Background -->
+<div class="absolute h-0.5 w-full bg-outline-variant/30 left-0"></div>
+<!-- Dynamic Progress -->
+<div class="absolute h-0.5 bg-gradient-to-r from-primary to-red-500 left-0 w-[60%]"></div>
+<div class="w-full flex justify-between relative">
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-green-500 border-4 border-[#09090F] z-10"></div>
+<span class="absolute mt-5 font-label-caps text-[9px] text-on-surface-variant">Ingest</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-primary border-4 border-[#09090F] z-10"></div>
+<span class="absolute mt-5 font-label-caps text-[9px] text-on-surface-variant">Parse</span>
+</div>
+<div class="flex flex-col items-center">
+<div class="w-4 h-4 rounded-full bg-red-500 border-4 border-[#09090F] z-10 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+<span class="absolute mt-5 font-label-caps text-[9px] text-red-500 font-bold">Infect</span>
+</div>
+<div class="flex flex-col items-center opacity-40">
+<div class="w-4 h-4 rounded-full bg-outline-variant border-4 border-[#09090F] z-10"></div>
+<span class="absolute mt-5 font-label-caps text-[9px] text-on-surface-variant">Exfil</span>
+</div>
+<div class="flex flex-col items-center opacity-40">
+<div class="w-4 h-4 rounded-full bg-outline-variant border-4 border-[#09090F] z-10"></div>
+<span class="absolute mt-5 font-label-caps text-[9px] text-on-surface-variant">Pivot</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-stack-md ml-stack-lg shrink-0">
+<span class="font-data-mono text-[12px] text-white/50">T+14:02:11</span>
+</div>
+</div>
+</main>
+<!-- Terminal Panel (Right) -->
+<aside class="w-[300px] h-full bg-[#0F0F1A] border-l border-outline-variant/30 flex flex-col shrink-0">
+<div class="p-panel-padding border-b border-outline-variant/20 flex items-center justify-between">
+<h3 class="font-headline-sm text-[14px] text-white">LIVE FEED</h3>
+<span class="material-symbols-outlined text-on-surface-variant text-[18px]">terminal</span>
+</div>
+<div class="flex-1 overflow-y-auto terminal-scroll font-data-mono text-[11px] p-unit bg-[#05050A]">
+<div class="space-y-unit">
+<div class="p-1 hover:bg-white/5">
+<span class="text-on-surface-variant/40">[14:02:15]</span> <span class="bg-red-500/10 text-red-500 px-1 rounded text-[9px] font-bold">CR</span>
+<span class="text-cyan-400">hash_mismatch</span> detected in <span class="text-white">@npm/react-dom</span>
+</div>
+<div class="p-1 hover:bg-white/5">
+<span class="text-on-surface-variant/40">[14:02:12]</span> <span class="bg-amber-500/10 text-amber-500 px-1 rounded text-[9px] font-bold">HI</span>
+<span class="text-cyan-400">new_dependency</span>: deep-extend-safe v1.2.1
+                </div>
+<div class="p-1 hover:bg-white/5">
+<span class="text-on-surface-variant/40">[14:01:58]</span> <span class="bg-blue-500/10 text-blue-500 px-1 rounded text-[9px] font-bold">LO</span>
+<span class="text-cyan-400">scan_complete</span> manifest checked (201 nodes)
+                </div>
+<div class="p-1 hover:bg-white/5">
+<span class="text-on-surface-variant/40">[14:01:45]</span> <span class="bg-purple-500/10 text-purple-500 px-1 rounded text-[9px] font-bold">ME</span>
+<span class="text-cyan-400">policy_warning</span> deprecated library version
+                </div>
+<!-- Continuous stream simulation -->
+<div class="p-1 opacity-60">
+<span class="text-on-surface-variant/40">[14:01:40]</span> <span class="bg-blue-500/10 text-blue-500 px-1 rounded text-[9px] font-bold">LO</span>
+<span class="text-cyan-400">meta_fetch</span> metadata retrieved for node_id: 8821
+                </div>
+<div class="p-1 opacity-50">
+<span class="text-on-surface-variant/40">[14:01:38]</span> <span class="bg-blue-500/10 text-blue-500 px-1 rounded text-[9px] font-bold">LO</span>
+<span class="text-cyan-400">session_init</span> alpha-9 active
+                </div>
+</div>
+</div>
+<!-- Package Sidepanel (Overlay in Right Column) -->
+<div class="h-1/2 border-t border-outline-variant/30 glass-panel p-panel-padding flex flex-col gap-stack-md shadow-inner">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-headline-sm text-white text-[16px]">UNTRUSTED_DEP</h4>
+<p class="font-data-mono text-[12px] text-red-500 opacity-80">v0.9.2-beta @ internal-registry</p>
+</div>
+<button class="text-on-surface-variant hover:text-white"><span class="material-symbols-outlined">close</span></button>
+</div>
+<!-- ADTG Signal Breakdown -->
+<div class="space-y-stack-sm">
+<div class="space-y-1">
+<div class="flex justify-between font-label-caps text-[9px] text-on-surface-variant">
+<span>CVE RISK</span>
+<span class="text-red-500">CRITICAL (9.8)</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-red-500 w-[95%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-label-caps text-[9px] text-on-surface-variant">
+<span>EPSS SCORE</span>
+<span class="text-amber-500">0.74</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-amber-500 w-[74%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-label-caps text-[9px] text-on-surface-variant">
+<span>EXPLOIT MATURITY</span>
+<span class="text-primary">PUBLIC</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[88%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-label-caps text-[9px] text-on-surface-variant">
+<span>MAINTAINER REPUTATION</span>
+<span class="text-blue-400">LOW_TRUST</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-blue-500 w-[20%]"></div>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex justify-between font-label-caps text-[9px] text-on-surface-variant">
+<span>RELEASE STABILITY</span>
+<span class="text-green-500">UNSTABLE</span>
+</div>
+<div class="h-1 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-green-500 w-[30%]"></div>
+</div>
+</div>
+</div>
+<!-- CVE List -->
+<div class="mt-stack-sm flex-1 overflow-y-auto terminal-scroll">
+<p class="font-label-caps text-[10px] text-white/50 mb-2">VULNERABILITIES (3)</p>
+<div class="space-y-2">
+<div class="flex justify-between items-center p-2 bg-white/5 rounded border border-red-500/20">
+<span class="font-data-mono text-[12px] text-cyan-400 underline cursor-pointer">CVE-2023-4412</span>
+<span class="font-data-mono text-[12px] text-amber-500 font-bold">9.8</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-white/5 rounded border border-white/10">
+<span class="font-data-mono text-[12px] text-cyan-400 underline cursor-pointer">CVE-2023-4501</span>
+<span class="font-data-mono text-[12px] text-amber-500 font-bold">7.2</span>
+</div>
+<div class="flex justify-between items-center p-2 bg-white/5 rounded border border-white/10 opacity-50">
+<span class="font-data-mono text-[12px] text-cyan-400 underline cursor-pointer">CVE-2022-1109</span>
+<span class="font-data-mono text-[12px] text-amber-500 font-bold">4.5</span>
+</div>
+</div>
+</div>
+</div>
+</aside>
+<script>
+        // Micro-interactions and simulation logic
+        document.querySelectorAll('.border-glow-purple, .border-glow-red').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-2px)';
+                card.style.transition = 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add periodic terminal updates simulation
+        const terminal = document.querySelector('.terminal-scroll div');
+        const severities = ['CR', 'HI', 'ME', 'LO'];
+        const colors = { CR: 'red-500', HI: 'amber-500', ME: 'purple-500', LO: 'blue-500' };
+        
+        setInterval(() => {
+            const time = new Date().toTimeString().split(' ')[0];
+            const sev = severities[Math.floor(Math.random() * severities.length)];
+            const newLog = document.createElement('div');
+            newLog.className = 'p-1 animate-pulse';
+            newLog.innerHTML = `
+                <span class="text-on-surface-variant/40">[${time}]</span> 
+                <span class="bg-${colors[sev]}/10 text-${colors[sev]} px-1 rounded text-[9px] font-bold">${sev}</span>
+                <span class="text-cyan-400">stream_packet</span> process_id: ${Math.floor(Math.random()*9000)+1000}
+            `;
+            terminal.prepend(newLog);
+            if (terminal.children.length > 25) terminal.lastElementChild.remove();
+        }, 4000);
+    </script>
+</body></html>

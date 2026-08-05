@@ -1,57 +1,319 @@
+// frontend/lib/api.ts
 import {
-  Package,
+  DashboardData,
   ScanStatus,
-  AttackPath,
-  Playbook,
+  Package,
+  CVERecord,
   PredictedRisk,
-  HealthStatus,
+  Playbook,
+  PlaybookFull,
+  AttackPath,
+  PRResponse,
   GovernanceEvent,
-  AIHealthMetrics,
-  RedTeamResult,
-  PRResponse
+  GovernancePolicyResult,
+  ComplianceReport,
+  RedTeamReport,
+  Tenant,
+  CompanyProfile,
+  ComplianceQuestion,
+  ComplianceAnswer,
+  ComplianceSession,
+  ComplianceGap,
+  RemediationItem,
+  HuntStatus
 } from '@/types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${API_BASE}${endpoint}`, {
+  const url = `${API_BASE}${endpoint}`;
+  const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+      ...options?.headers
+    }
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `API Error: ${res.status}`);
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`API Error ${response.status}: ${errorBody || response.statusText}`);
   }
-  return res.json();
+
+  return response.json();
 }
 
-export const uploadSBOM = async (file: File): Promise<{ scan_id: string; status: string; message: string }> => {
+// ── Core API Functions ──
+
+export const getDashboardData = (scanId: string = 'default') =>
+  fetchAPI<DashboardData>(`/api/scan/${scanId}/dashboard`);
+
+export const startScan = (sbomFile: File) => {
   const formData = new FormData();
-  formData.append('file', file);
-  const res = await fetch(`${API_BASE}/api/upload-sbom`, {
+  formData.append('file', sbomFile);
+  return fetch(`${API_BASE}/api/scan`, {
     method: 'POST',
-    body: formData,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.message || `API Error: ${res.status}`);
-  }
-  return res.json();
+    body: formData
+  }).then(res => res.json());
 };
 
-export const triggerScan = (scanId: string) => fetchAPI<{ message: string; scan_id: string }>(`/api/scan/${scanId}`, { method: 'POST' });
-export const getScanStatus = (scanId: string) => fetchAPI<ScanStatus>(`/api/scan/${scanId}/status`);
-export const getPackages = (scanId: string) => fetchAPI<Package[]>(`/api/scan/${scanId}/packages`);
-export const getAttackPaths = (scanId: string) => fetchAPI<AttackPath[]>(`/api/scan/${scanId}/attack-paths`);
-export const getPlaybooks = (scanId: string) => fetchAPI<Playbook[]>(`/api/scan/${scanId}/playbooks`);
-export const getPredictions = (scanId: string) => fetchAPI<PredictedRisk[]>(`/api/scan/${scanId}/predictions`);
-export const generatePR = (scanId: string, packageName: string) => fetchAPI<PRResponse>(`/api/scan/${scanId}/generate-pr/${packageName}`, { method: 'POST' });
-export const getHealth = () => fetchAPI<HealthStatus>('/api/health');
-export const checkPrompt = (prompt: string, model: string) => fetchAPI<GovernanceEvent>('/api/governance/check-prompt', { method: 'POST', body: JSON.stringify({ prompt, model }) });
-export const getAuditLog = () => fetchAPI<GovernanceEvent[]>('/api/governance/audit-log');
-export const getGovernanceMetrics = () => fetchAPI<AIHealthMetrics>('/api/governance/metrics');
-export const runRedTeam = (scanId: string) => fetchAPI<{ message: string; scan_id: string }>(`/api/red-team/run/${scanId}`, { method: 'POST' });
-export const getRedTeamResults = (scanId: string) => fetchAPI<RedTeamResult[]>(`/api/red-team/results/${scanId}`);
+export const uploadSBOM = startScan;
+
+export const getScanStatus = (scanId: string) =>
+  fetchAPI<ScanStatus>(`/api/scan/${scanId}/status`);
+
+export const getPackages = (scanId: string) =>
+  fetchAPI<Package[]>(`/api/scan/${scanId}/packages`);
+
+export const getCVEs = (scanId: string) =>
+  fetchAPI<CVERecord[]>(`/api/scan/${scanId}/cves`);
+
+export const getPredictions = (scanId: string) =>
+  fetchAPI<PredictedRisk[]>(`/api/scan/${scanId}/predictions`);
+
+export const getPlaybooks = (scanId: string) =>
+  fetchAPI<Playbook[]>(`/api/scan/${scanId}/playbooks`);
+
+export const getPlaybook = (scanId: string, packageName: string) =>
+  fetchAPI<PlaybookFull>(`/api/scan/${scanId}/playbook/${packageName}`);
+
+export const getAttackPaths = (scanId: string) =>
+  fetchAPI<AttackPath[]>(`/api/scan/${scanId}/attack-paths`);
+
+export const generatePR = (scanId: string, packageName: string) =>
+  fetchAPI<PRResponse>(`/api/scan/${scanId}/generate-pr/${packageName}`, {
+    method: 'POST'
+  });
+
+// ── HUNT Module API Functions ──
+
+export const triggerHunt = (scanId: string, packageNames?: string[]) =>
+  fetchAPI<{ hunt_id: string; status: string }>(`/api/hunt/${scanId}`, {
+    method: 'POST',
+    body: JSON.stringify({ package_names: packageNames })
+  });
+
+export const getHuntStatus = (scanId: string) =>
+  fetchAPI<HuntStatus>(`/api/hunt/${scanId}/status`);
+
+export const getHuntPlaybooks = (scanId: string) =>
+  fetchAPI<Playbook[]>(`/api/hunt/${scanId}/playbooks`);
+
+export const askCopilot = (scanId: string, question: string) =>
+  fetchAPI<{ answer: string }>(`/api/hunt/${scanId}/ask`, {
+    method: 'POST',
+    body: JSON.stringify({ question })
+  });
+
+// ── DEFEND Module API Functions ──
+
+export const getGovernanceEvents = (limit: number = 50, riskLevel?: string, eventType?: string) => {
+  const query = new URLSearchParams();
+  query.append('limit', limit.toString());
+  if (riskLevel) query.append('risk_level', riskLevel);
+  if (eventType) query.append('event_type', eventType);
+  return fetchAPI<GovernanceEvent[]>(`/api/defend/governance/events?${query.toString()}`);
+};
+
+export const getGovernanceStats = () =>
+  fetchAPI<{
+    total_events: number;
+    events_by_risk_level: Record<string, number>;
+    events_by_event_type: Record<string, number>;
+    blocked_count: number;
+    allowed_count: number;
+    recent_critical_events: GovernanceEvent[];
+  }>('/api/defend/governance/stats');
+
+export const testGovernancePolicy = (prompt: string, response?: string) =>
+  fetchAPI<GovernancePolicyResult>('/api/defend/governance/test', {
+    method: 'POST',
+    body: JSON.stringify({ prompt, response })
+  });
+
+export const getComplianceReport = (scanId: string) =>
+  fetchAPI<ComplianceReport>(`/api/defend/compliance/${scanId}`);
+
+export const downloadComplianceReport = (scanId: string) => {
+  window.open(`${API_BASE}/api/defend/compliance/${scanId}/report`, '_blank');
+};
+
+export const startRedTeam = (scanId: string) =>
+  fetchAPI<{ scan_id: string; status: string; message: string }>(`/api/defend/red-team/${scanId}`, {
+    method: 'POST'
+  });
+
+export const getRedTeamStatus = (scanId: string) =>
+  fetchAPI<{ scan_id: string; completed: number; total: number; status: string }>(`/api/defend/red-team/${scanId}/status`);
+
+export const getRedTeamReport = (scanId: string) =>
+  fetchAPI<RedTeamReport>(`/api/defend/red-team/${scanId}/report`);
+
+export const registerTenant = (tenantName: string, scanId: string) =>
+  fetchAPI<Tenant>('/api/defend/tenants/register', {
+    method: 'POST',
+    body: JSON.stringify({ tenant_name: tenantName, scan_id: scanId })
+  });
+
+export const uploadAndRegisterTenants = (
+  tenantName1: string,
+  file1: File,
+  tenantName2?: string,
+  file2?: File
+) => {
+  const formData = new FormData();
+  formData.append('tenant_name_1', tenantName1);
+  formData.append('file1', file1);
+  if (tenantName2 && file2) {
+    formData.append('tenant_name_2', tenantName2);
+    formData.append('file2', file2);
+  }
+
+  return fetch(`${API_BASE}/api/defend/tenants/upload-and-register`, {
+    method: 'POST',
+    body: formData
+  }).then(res => {
+    if (!res.ok) {
+      return res.text().then(text => {
+        throw new Error(text || 'Failed to upload and register tenants');
+      });
+    }
+    return res.json();
+  });
+};
+
+export const getTenants = () =>
+  fetchAPI<Tenant[]>('/api/defend/tenants');
+
+export const simulateAttack = (packageName: string, newTrustScore: number, triggeredByTenantId?: string) =>
+  fetchAPI<{ message: string; banner_text?: string; affected_tenants: Array<{ tenant_id: string; tenant_name: string; old_score: number; new_score: number; stagger_ms?: number }> }>(
+    '/api/defend/tenants/simulate-attack',
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        package_name: packageName,
+        new_trust_score: newTrustScore,
+        triggered_by_tenant_id: triggeredByTenantId
+      })
+    }
+  );
+
+export const resetTenants = () =>
+  fetchAPI<{ message: string; tenants: Tenant[] }>('/api/defend/tenants/reset', { method: 'POST' });
+
+export const getTenantHealth = (tenantId: string) =>
+  fetchAPI<Tenant>(`/api/defend/tenants/${tenantId}/health`);
+
+// ── Full-Spectrum Compliance API Functions ──
+
+export const createCompanyProfile = (
+  scanId: string,
+  profile: {
+    industry: string;
+    company_size: string;
+    regions: string[];
+    data_types: string[];
+    existing_certifications: string[];
+  }
+) =>
+  fetchAPI<{ profile_id: string; applicable_frameworks: Record<string, string> }>(
+    `/api/compliance/${scanId}/profile`,
+    {
+      method: 'POST',
+      body: JSON.stringify(profile)
+    }
+  );
+
+export const getCompanyProfile = (scanId: string) =>
+  fetchAPI<CompanyProfile>(`/api/compliance/${scanId}/profile`);
+
+export const getComplianceQuestions = (scanId: string, domain: string) =>
+  fetchAPI<ComplianceQuestion[]>(`/api/compliance/${scanId}/questions/${domain}`);
+
+export const getComplianceSession = (scanId: string) =>
+  fetchAPI<ComplianceSession>(`/api/compliance/${scanId}/session`);
+
+export const submitAnswers = (scanId: string, answers: ComplianceAnswer[]) =>
+  fetchAPI<{ status: string; answered_questions: number }>(`/api/compliance/${scanId}/answers`, {
+    method: 'POST',
+    body: JSON.stringify({ answers })
+  });
+
+export const getComplianceScores = (scanId: string) =>
+  fetchAPI<{
+    overall_score: number;
+    domain_scores: Record<string, number>;
+    framework_scores: Record<string, number>;
+    critical_gaps: ComplianceGap[];
+    gap_count: number;
+    domain_counts: Record<string, { total: number; answered: number }>;
+  }>(`/api/compliance/${scanId}/scores`);
+
+export const generateComplianceReport = (scanId: string) =>
+  fetchAPI<{ report_id: string; status: string }>(`/api/compliance/${scanId}/generate-report`, {
+    method: 'POST'
+  });
+
+export const getFullComplianceReport = (scanId: string) =>
+  fetchAPI<ComplianceReport>(`/api/compliance/${scanId}/report`);
+
+export const downloadFullComplianceReport = (scanId: string) => {
+  window.open(`${API_BASE}/api/compliance/${scanId}/report/download`, '_blank');
+};
+
+// ── Three-Layer Compliance Verification Engine API Functions ──
+
+import { VerificationResults, CrossValidationResult } from '@/types';
+
+export const triggerVerification = (scanId: string) =>
+  fetchAPI<{ verification_id: string; scan_id: string; status: string }>(`/api/compliance/${scanId}/verify`, {
+    method: 'POST'
+  });
+
+export const getVerificationStatus = (scanId: string) =>
+  fetchAPI<{ scan_id: string; status: string }>(`/api/compliance/${scanId}/verification/status`);
+
+export const getVerificationResults = (scanId: string) =>
+  fetchAPI<VerificationResults>(`/api/compliance/${scanId}/verification/results`);
+
+export const getContradictions = (scanId: string) =>
+  fetchAPI<{ scan_id: string; contradictions: CrossValidationResult[]; count: number }>(
+    `/api/compliance/${scanId}/verification/contradictions`
+  );
+
+// ── AI Red Team as a Service API Functions ──
+
+import {
+  AIProductConfig,
+  RedTeamRunStatus,
+  RedTeamServiceReport,
+  RedTeamRunHistoryItem
+} from '@/types';
+
+export const updateAIProductConfig = (scanId: string, config: AIProductConfig) =>
+  fetchAPI<{ status: string; message: string; company_profile: Record<string, unknown> }>(
+    `/api/defend/red-team-service/${scanId}/config`,
+    {
+      method: 'POST',
+      body: JSON.stringify(config)
+    }
+  );
+
+export const startRedTeamServiceRun = (scanId: string) =>
+  fetchAPI<{ scan_id: string; status: string; message: string }>(
+    `/api/defend/red-team-service/${scanId}/run`,
+    {
+      method: 'POST'
+    }
+  );
+
+export const getRedTeamServiceStatus = (scanId: string) =>
+  fetchAPI<RedTeamRunStatus>(`/api/defend/red-team-service/${scanId}/status`);
+
+export const getLatestRedTeamServiceReport = (scanId: string) =>
+  fetchAPI<RedTeamServiceReport>(`/api/defend/red-team-service/${scanId}/report`);
+
+export const getRedTeamServiceHistory = (scanId: string) =>
+  fetchAPI<{ scan_id: string; history: RedTeamRunHistoryItem[] }>(
+    `/api/defend/red-team-service/${scanId}/history`
+  );

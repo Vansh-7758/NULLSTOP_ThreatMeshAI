@@ -1,0 +1,37 @@
+/* ─── APPEND TO index.css — Section Separator System ────────── */
+
+/* ── Between-section glow flush ── */
+.section-glow-top {
+  position: relative;
+}
+.section-glow-top::before {
+  content: '';
+  position: absolute;
+  inset-x-0;
+  top: -1px;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(95,1,251,0.07) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Decorative bracket lines ── */
+.bracket-left::before,
+.bracket-right::after {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: rgba(95,1,251,0.30);
+  border-style: solid;
+}
+.bracket-left::before {
+  top: 0; left: 0;
+  border-width: 1px 0 0 1px;
+  border-radius: 4px 0 0 0;
+}
+.bracket-right::after {
+  bottom: 0; right: 0;
+  border-width: 0 1px 1px 0;
+  border-radius: 0 0 4px 0;
+}

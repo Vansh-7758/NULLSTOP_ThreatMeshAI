@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ThreatMesh AI | Autonomous Supply Chain Defense</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        :root {
+            --glow-purple: #7c3aed;
+            --glow-blue: #0053db;
+            --glow-red: #cb161c;
+        }
+        
+        body {
+            background-color: #09090F;
+            overflow: hidden; /* Lock scroll for the landing empty state */
+        }
+
+        .border-glow-card {
+            position: relative;
+            background: #09090F;
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+
+        .border-glow-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--glow-purple), var(--glow-blue), var(--glow-red));
+            border-radius: inherit;
+            z-index: -1;
+            filter: blur(8px);
+            opacity: 0.6;
+            animation: glow-pulse 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow-pulse {
+            from { opacity: 0.4; filter: blur(6px); }
+            to { opacity: 0.8; filter: blur(10px); }
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .glass-panel {
+            background: rgba(15, 15, 26, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid #1E1E3A;
+        }
+
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(124, 58, 237, 0.2);
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            pointer-events: none;
+            animation: scanline 6s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(100vh); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "on-primary-container": "#ede0ff",
+                        "inverse-on-surface": "#303037",
+                        "tertiary-fixed-dim": "#ffb4ab",
+                        "on-error": "#690005",
+                        "background": "#09090F",
+                        "surface-container-lowest": "#0e0e14",
+                        "surface-tint": "#d2bbff",
+                        "on-background": "#e4e1ea",
+                        "on-primary-fixed": "#25005a",
+                        "surface-container-low": "#1b1b21",
+                        "on-secondary-fixed": "#00174b",
+                        "on-error-container": "#ffdad6",
+                        "inverse-primary": "#732ee4",
+                        "secondary-fixed": "#dbe1ff",
+                        "on-tertiary-fixed-variant": "#93000b",
+                        "primary-fixed": "#eaddff",
+                        "surface-dim": "#131319",
+                        "surface-container": "#1f1f26",
+                        "outline": "#958da1",
+                        "secondary": "#b4c5ff",
+                        "tertiary-fixed": "#ffdad6",
+                        "primary-fixed-dim": "#d2bbff",
+                        "tertiary": "#ffb4ab",
+                        "surface-variant": "#35343b",
+                        "secondary-fixed-dim": "#b4c5ff",
+                        "outline-variant": "#4a4455",
+                        "on-surface-variant": "#ccc3d8",
+                        "on-secondary-container": "#cdd7ff",
+                        "error": "#ffb4ab",
+                        "on-tertiary-container": "#ffdeda",
+                        "on-tertiary-fixed": "#410002",
+                        "on-primary": "#3f008e",
+                        "surface-container-high": "#2a2930",
+                        "error-container": "#93000a",
+                        "on-surface": "#e4e1ea",
+                        "secondary-container": "#0053db",
+                        "tertiary-container": "#cb161c",
+                        "on-secondary-fixed-variant": "#003ea8",
+                        "surface": "#131319",
+                        "on-secondary": "#002a78",
+                        "primary": "#d2bbff",
+                        "on-tertiary": "#690005",
+                        "surface-bright": "#393840",
+                        "inverse-surface": "#e4e1ea",
+                        "primary-container": "#7c3aed",
+                        "surface-container-highest": "#35343b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "unit": "4px",
+                        "stack-lg": "32px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "margin-page": "24px",
+                        "gutter": "16px",
+                        "panel-padding": "12px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Space Grotesk"],
+                        "headline-sm": ["Space Grotesk"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-md": ["Space Grotesk"],
+                        "headline-lg": ["Space Grotesk"],
+                        "label-caps": ["JetBrains Mono"],
+                        "data-mono": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- Background Shader -->
+
+<div class="scanline"></div>
+<!-- Navigation Overlay -->
+<header class="fixed top-0 left-0 right-0 z-50 px-margin-page py-stack-md flex justify-between items-center">
+<!-- Top Left: Wordmark -->
+<div class="flex items-center gap-2">
+<span class="font-display-lg text-headline-md font-bold tracking-tighter text-on-surface">THREAT</span>
+<span class="font-display-lg text-headline-md font-bold tracking-tighter text-primary-container">MESH</span>
+</div>
+<!-- Top Navigation Dock (Pinned Center) -->
+<nav class="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center glass-panel rounded-full px-6 py-2 gap-8 border-outline-variant/30">
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">visibility</span>
+<span class="font-label-caps text-[10px] text-primary">WATCH</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-secondary group-hover:scale-110 transition-transform">radar</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-secondary">HUNT</span>
+</a>
+<a class="flex flex-col items-center gap-1 group" href="#">
+<span class="material-symbols-outlined text-on-surface-variant group-hover:text-error group-hover:scale-110 transition-transform">shield</span>
+<span class="font-label-caps text-[10px] text-on-surface-variant group-hover:text-error">DEFEND</span>
+</a>
+</nav>
+<!-- Top Right: System Status -->
+<div class="flex items-center gap-3">
+<div class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</div>
+<span class="font-label-caps text-on-surface-variant tracking-wider">Systems Operational</span>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="relative z-10 w-full h-screen flex flex-col items-center justify-center px-margin-page">
+<!-- Hero: Centered BorderGlow card -->
+<div class="border-glow-card w-full max-w-2xl p-12 flex flex-col items-center text-center shadow-2xl">
+<!-- Hero Header -->
+<div class="flex items-center gap-3 mb-2">
+<span class="font-display-lg text-[48px] font-bold text-white tracking-tighter">THREAT</span>
+<span class="font-display-lg text-[48px] font-bold text-primary-container tracking-tighter">MESH</span>
+</div>
+<p class="font-headline-sm text-on-surface-variant/80 mb-stack-lg tracking-tight">
+                Autonomous Supply Chain Defense
+            </p>
+<!-- Upload Zone -->
+<div class="w-full bg-surface-container-lowest border-2 border-dashed border-[#2D2D5E] rounded-lg p-stack-lg flex flex-col items-center gap-4 cursor-pointer hover:border-primary-container transition-all group mb-stack-lg">
+<div class="p-4 rounded-full bg-primary-container/10">
+<span class="material-symbols-outlined text-primary-container text-4xl group-hover:scale-110 transition-transform" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+</div>
+<p class="font-data-mono text-on-surface-variant text-[13px]">
+                    Drop your SBOM here — CycloneDX or SPDX JSON
+                </p>
+<div class="flex gap-2">
+<span class="px-2 py-1 bg-surface-variant/30 text-[10px] font-label-caps border border-outline-variant/50 rounded">AUTO-SCAN</span>
+<span class="px-2 py-1 bg-surface-variant/30 text-[10px] font-label-caps border border-outline-variant/50 rounded">VEX MAPPING</span>
+</div>
+</div>
+<!-- Stat Pills -->
+<div class="flex flex-wrap justify-center gap-3">
+<div class="flex items-center gap-2 px-4 py-2 bg-[#141428] border border-outline-variant/30 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-error"></div>
+<span class="font-data-mono text-[11px] text-on-surface-variant">48% of breaches via third parties</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-[#141428] border border-outline-variant/30 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+<span class="font-data-mono text-[11px] text-on-surface-variant">32 days avg remediation</span>
+</div>
+<div class="flex items-center gap-2 px-4 py-2 bg-[#141428] border border-outline-variant/30 rounded-full">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+<span class="font-data-mono text-[11px] text-on-surface-variant">8 AI agents per threat</span>
+</div>
+</div>
+</div>
+<!-- FlowingMenu selector strip -->
+<div class="fixed bottom-12 left-0 right-0 w-full overflow-hidden border-y border-outline-variant/10 py-6 glass-panel backdrop-blur-md">
+<div class="marquee-container relative">
+<div class="marquee-content flex gap-32 items-center">
+<!-- Set 1 -->
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-primary opacity-30 group-hover:opacity-100 transition-opacity">WATCH</span>
+<span class="material-symbols-outlined text-primary text-xl">radar</span>
+</div>
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-secondary opacity-30 group-hover:opacity-100 transition-opacity">HUNT</span>
+<span class="material-symbols-outlined text-secondary text-xl">travel_explore</span>
+</div>
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-error opacity-30 group-hover:opacity-100 transition-opacity">DEFEND</span>
+<span class="material-symbols-outlined text-error text-xl">security</span>
+</div>
+<!-- Set 2 (for seamless loop) -->
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-primary opacity-30 group-hover:opacity-100 transition-opacity">WATCH</span>
+<span class="material-symbols-outlined text-primary text-xl">radar</span>
+</div>
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-secondary opacity-30 group-hover:opacity-100 transition-opacity">HUNT</span>
+<span class="material-symbols-outlined text-secondary text-xl">travel_explore</span>
+</div>
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-error opacity-30 group-hover:opacity-100 transition-opacity">DEFEND</span>
+<span class="material-symbols-outlined text-error text-xl">security</span>
+</div>
+<!-- Set 3 -->
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-primary opacity-30 group-hover:opacity-100 transition-opacity">WATCH</span>
+<span class="material-symbols-outlined text-primary text-xl">radar</span>
+</div>
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-secondary opacity-30 group-hover:opacity-100 transition-opacity">HUNT</span>
+<span class="material-symbols-outlined text-secondary text-xl">travel_explore</span>
+</div>
+<div class="flex items-center gap-6 group cursor-pointer">
+<span class="font-display-lg text-4xl font-bold text-error opacity-30 group-hover:opacity-100 transition-opacity">DEFEND</span>
+<span class="material-symbols-outlined text-error text-xl">security</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Overlay Info -->
+<footer class="fixed bottom-4 left-margin-page right-margin-page z-20 flex justify-between items-center">
+<div class="flex gap-6 font-data-mono text-[10px] text-on-surface-variant/40">
+<span>© 2024 THREATMESH AI</span>
+<span>SECURE TERMINAL ALPHA-9</span>
+</div>
+<div class="flex gap-4">
+<button class="p-2 border border-outline-variant/30 rounded hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-lg">terminal</span>
+</button>
+<button class="p-2 border border-outline-variant/30 rounded hover:bg-surface-variant/50 transition-colors">
+<span class="material-symbols-outlined text-lg">settings</span>
+</button>
+</div>
+</footer>
+<script>
+        // Micro-interaction for the upload zone
+        const uploadZone = document.querySelector('.border-glow-card > div:nth-child(3)');
+        if(uploadZone) {
+            uploadZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadZone.classList.add('border-primary-container', 'bg-primary-container/5');
+            });
+            uploadZone.addEventListener('dragleave', () => {
+                uploadZone.classList.remove('border-primary-container', 'bg-primary-container/5');
+            });
+            uploadZone.addEventListener('click', () => {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.click();
+            });
+        }
+
+        // Random log stream effect in console-style (atmospheric only)
+        function generateAtmosphericLogs() {
+            const container = document.createElement('div');
+            container.className = 'fixed bottom-32 left-4 w-48 h-32 overflow-hidden pointer-events-none opacity-20 hidden lg:block';
+            document.body.appendChild(container);
+
+            setInterval(() => {
+                const log = document.createElement('div');
+                log.className = 'font-data-mono text-[8px] text-emerald-500 whitespace-nowrap mb-1';
+                log.innerText = `[${new Date().toLocaleTimeString()}] SYN_CHECK: ${Math.random().toString(36).substring(7).toUpperCase()} ... OK`;
+                container.appendChild(log);
+                if (container.children.length > 10) container.removeChild(container.firstChild);
+            }, 2000);
+        }
+        generateAtmosphericLogs();
+    </script>
+</body></html>

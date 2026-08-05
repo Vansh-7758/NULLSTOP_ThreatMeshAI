@@ -51,14 +51,14 @@ export default function PlaybookCard({ playbook }: { playbook: Playbook }) {
               </div>
               
               <div className="flex flex-wrap gap-2 pt-2">
-                {Object.entries(playbook.compliance_mapping).map(([key, val]) => (
+                {Object.entries(playbook.compliance_mapping || {}).map(([key, val]) => (
                   <span key={key} className="bg-background border border-border px-2 py-1 rounded-md text-xs">
-                    <strong className="text-accent">{key}:</strong> {val}
+                    <strong className="text-accent">{key}:</strong> {String(val)}
                   </span>
                 ))}
               </div>
               
-              {playbook.evidence_citations.length > 0 && (
+              {playbook.evidence_citations && playbook.evidence_citations.length > 0 && (
                 <div className="pt-2 border-t border-border/50">
                   <strong className="block text-text-secondary mb-2">Evidence</strong>
                   <ul className="space-y-1">

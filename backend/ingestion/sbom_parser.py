@@ -1,11 +1,13 @@
 import json
-from typing import Tuple, List
+from typing import Tuple, List, Union
 from models.schemas import Package, NodeType
 
-def parse_sbom(content: bytes, filename: str) -> Tuple[List[Package], List[Tuple[str, str]]]:
+def parse_sbom(content: Union[bytes, str], filename: str) -> Tuple[List[Package], List[Tuple[str, str]]]:
     try:
-        data = json.loads(content.decode("utf-8"))
-    except json.JSONDecodeError:
+        if isinstance(content, bytes):
+            content = content.decode("utf-8")
+        data = json.loads(content)
+    except Exception:
         return [], []
         
     if "bomFormat" in data and data["bomFormat"] == "CycloneDX":
@@ -38,7 +40,7 @@ def _parse_cyclonedx(data: dict) -> Tuple[List[Package], List[Tuple[str, str]]]:
             node_type=NodeType.PACKAGE
         )
         packages.append(root_package)
-    
+
     components = data.get("components", [])
     for comp in components:
         purl = comp.get("purl", "")
@@ -49,61 +51,62 @@ def _parse_cyclonedx(data: dict) -> Tuple[List[Package], List[Tuple[str, str]]]:
             ecosystem = "pypi"
         elif purl.startswith("pkg:maven/"):
             ecosystem = "maven"
-            
+
+        node_type = NodeType.PACKAGE
+        name_lower = comp.get("name", "").lower()
+        if any(kw in name_lower for kw in ["gpt", "bert", "llama", "model"]):
+            node_type = NodeType.AI_MODEL
+        elif any(kw in name_lower for kw in ["prompt"]):
+            node_type = NodeType.PROMPT
+        elif any(kw in name_lower for kw in ["chroma", "pinecone", "qdrant"]):
+            node_type = NodeType.VECTOR_DB
+
         pkg = Package(
             name=comp.get("name", "unknown"),
             version=comp.get("version", "unknown"),
             ecosystem=ecosystem,
             purl=purl,
-            node_type=NodeType.PACKAGE
+            node_type=node_type
         )
         packages.append(pkg)
-        
+
     dependencies = data.get("dependencies", [])
     for dep in dependencies:
-        parent_ref = dep.get("ref")
-        depends_on = dep.get("dependsOn", [])
-        if parent_ref:
-            for child_ref in depends_on:
-                edges.append((parent_ref, child_ref))
-                
+        ref = dep.get("ref", "")
+        for depends_on in dep.get("dependsOn", []):
+            edges.append((ref, depends_on))
+
     return packages, edges
 
 def _parse_spdx(data: dict) -> Tuple[List[Package], List[Tuple[str, str]]]:
     packages = []
     edges = []
-    
-    spdx_packages = data.get("packages", [])
-    for spdx_pkg in spdx_packages:
+
+    packages_data = data.get("packages", [])
+    for pkg_data in packages_data:
         purl = ""
-        ecosystem = "unknown"
-        external_refs = spdx_pkg.get("externalRefs", [])
-        for ref in external_refs:
+        for ref in pkg_data.get("externalRefs", []):
             if ref.get("referenceType") == "purl":
                 purl = ref.get("referenceLocator", "")
-                if purl.startswith("pkg:npm/"):
-                    ecosystem = "npm"
-                elif purl.startswith("pkg:pypi/"):
-                    ecosystem = "pypi"
-                elif purl.startswith("pkg:maven/"):
-                    ecosystem = "maven"
-                break
-                
+
+        ecosystem = "unknown"
+        if purl.startswith("pkg:npm/"):
+            ecosystem = "npm"
+        elif purl.startswith("pkg:pypi/"):
+            ecosystem = "pypi"
+
         pkg = Package(
-            name=spdx_pkg.get("name", "unknown"),
-            version=spdx_pkg.get("versionInfo", "unknown"),
+            name=pkg_data.get("name", "unknown"),
+            version=pkg_data.get("versionInfo", "unknown"),
             ecosystem=ecosystem,
             purl=purl,
             node_type=NodeType.PACKAGE
         )
         packages.append(pkg)
-        
+
     relationships = data.get("relationships", [])
     for rel in relationships:
         if rel.get("relationshipType") == "DEPENDS_ON":
-            parent = rel.get("spdxElementId")
-            child = rel.get("relatedSpdxElement")
-            if parent and child:
-                edges.append((parent, child))
-                
+            edges.append((rel.get("spdxElementId"), rel.get("relatedSpdxElement")))
+
     return packages, edges

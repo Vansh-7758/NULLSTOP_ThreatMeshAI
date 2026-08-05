@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ThreatMesh AI | Autonomous Supply Chain Defense</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+<style>
+        :root {
+            --glow-purple: #7c3aed;
+            --glow-blue: #0053db;
+            --glow-red: #cb161c;
+        }
+        
+        body {
+            background-color: #09090F;
+            color: #e4e1ea;
+            overflow-x: hidden;
+        }
+
+        .dither-bg {
+            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 32px 32px;
+        }
+
+        .border-glow-card {
+            position: relative;
+            background: #0F0F1A;
+            border-radius: 0.5rem;
+            z-index: 1;
+        }
+
+        .border-glow-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            background: linear-gradient(45deg, var(--glow-color, var(--glow-purple)), transparent, var(--glow-color, var(--glow-purple)));
+            border-radius: inherit;
+            z-index: -1;
+            filter: blur(4px);
+            opacity: 0.4;
+        }
+
+        .ascii-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(60px, 15vw, 180px);
+            line-height: 0.8;
+            letter-spacing: -0.05em;
+            text-transform: uppercase;
+            font-weight: 800;
+            background: linear-gradient(to bottom, #ffffff 30%, #35343b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .marquee-container {
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 40s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .glass-panel {
+            background: rgba(15, 15, 26, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .scanline {
+            width: 100%;
+            height: 2px;
+            background: rgba(124, 58, 237, 0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+            pointer-events: none;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .pulse-label {
+            animation: pulse-opacity 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-opacity {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#d2bbff",
+                        "secondary": "#b4c5ff",
+                        "tertiary": "#ffb4ab",
+                        "error": "#ffb4ab",
+                        "surface": "#131319",
+                        "surface-container": "#1f1f26",
+                        "primary-container": "#7c3aed",
+                        "on-surface": "#e4e1ea",
+                        "on-surface-variant": "#ccc3d8",
+                        "outline-variant": "#4a4455"
+                    },
+                    "fontFamily": {
+                        "display": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "mono": ["JetBrains Mono"]
+                    },
+                    "spacing": {
+                        "margin-page": "24px",
+                        "stack-lg": "32px",
+                        "stack-md": "16px",
+                        "stack-sm": "8px"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="font-body antialiased">
+<div class="scanline"></div>
+<!-- Fixed Header / Dock -->
+<header class="fixed top-8 left-1/2 -translate-x-1/2 z-[100] w-full max-w-xl px-4">
+<nav class="glass-panel rounded-full px-8 py-3 flex items-center justify-between shadow-2xl">
+<div class="flex items-center gap-2">
+<span class="font-display font-bold text-lg tracking-tighter">THREAT<span class="text-primary-container">MESH</span></span>
+</div>
+<div class="flex items-center gap-8">
+<a class="text-[10px] font-mono font-bold tracking-widest text-on-surface-variant hover:text-white transition-colors" href="#">WATCH</a>
+<a class="text-[10px] font-mono font-bold tracking-widest text-on-surface-variant hover:text-white transition-colors" href="#">HUNT</a>
+<a class="text-[10px] font-mono font-bold tracking-widest text-on-surface-variant hover:text-white transition-colors" href="#">DEFEND</a>
+</div>
+<div class="flex items-center gap-3">
+<div class="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+<span class="text-[9px] font-mono font-bold text-emerald-500 uppercase tracking-tighter">Live</span>
+</div>
+</nav>
+</header>
+<!-- SECTION 1: HERO -->
+<section class="relative min-h-screen flex flex-col items-center justify-center text-center px-margin-page dither-bg overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#09090F]"></div>
+<div class="relative z-10 max-w-7xl mx-auto">
+<div class="pulse-label mb-8">
+<span class="px-3 py-1 border border-primary/30 rounded-full text-[10px] font-mono tracking-[0.2em] text-primary bg-primary/5 uppercase">
+                    Autonomous Intelligence Grid v9.0
+                </span>
+</div>
+<h1 class="ascii-text mb-6">THREATMESH</h1>
+<p class="max-w-2xl mx-auto text-xl md:text-2xl font-light text-on-surface-variant mb-12">
+                The world's first <span class="font-semibold text-white">autonomous defense mesh</span> for high-stakes software supply chains.
+            </p>
+<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+<a class="px-8 py-4 bg-primary-container text-white font-display font-bold rounded-lg hover:brightness-110 transition-all shadow-lg shadow-primary-container/20 flex items-center gap-2" href="/dashboard">
+                    DEPLOY MESH <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+<button class="px-8 py-4 border border-outline-variant/30 text-on-surface font-display font-bold rounded-lg hover:bg-white/5 transition-all">
+                    VIEW PROTOCOL
+                </button>
+</div>
+</div>
+</section>
+<!-- SECTION 2: PROBLEM STATEMENT -->
+<section class="py-32 bg-[#09090F] px-margin-page relative overflow-hidden">
+<div class="max-w-4xl mx-auto">
+<h2 class="text-3xl md:text-5xl font-light leading-tight text-on-surface-variant mb-16">
+                Current supply chain security is <span class="text-white font-medium">reactive, fragmented, and failing.</span> 
+                Legacy scanners miss <span class="text-error font-extrabold">48%</span> of vulnerabilities introduced via <span class="text-amber-500 font-extrabold">3rd party</span> dependencies.
+            </h2>
+<div class="grid md:grid-cols-3 gap-12 border-t border-outline-variant/20 pt-12">
+<div class="space-y-2">
+<span class="block text-[10px] font-mono text-outline-variant uppercase tracking-widest">Latency</span>
+<p class="text-2xl font-mono text-primary">32 DAYS</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Average time to remediation after initial discovery.</p>
+</div>
+<div class="space-y-2">
+<span class="block text-[10px] font-mono text-outline-variant uppercase tracking-widest">Complexity</span>
+<p class="text-2xl font-mono text-secondary">1.2M+</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Deep-node dependencies in modern enterprise stacks.</p>
+</div>
+<div class="space-y-2">
+<span class="block text-[10px] font-mono text-outline-variant uppercase tracking-widest">Exposure</span>
+<p class="text-2xl font-mono text-error">92%</p>
+<p class="text-xs text-on-surface-variant leading-relaxed">Breaches involving open-source component exploits.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 3: HOW IT WORKS -->
+<section class="py-32 bg-[#0F0F1A] px-margin-page">
+<div class="max-w-7xl mx-auto">
+<div class="mb-20">
+<span class="text-primary font-mono text-[11px] uppercase tracking-[0.3em]">Operational Framework</span>
+<h2 class="text-4xl md:text-5xl font-display font-bold mt-4">Three Layers of Autonomy</h2>
+</div>
+<div class="grid lg:grid-cols-3 gap-8">
+<!-- WATCH -->
+<div class="border-glow-card p-8 flex flex-col h-full" style="--glow-color: var(--glow-purple)">
+<div class="mb-8">
+<span class="material-symbols-outlined text-4xl text-primary mb-4">visibility</span>
+<h3 class="text-2xl font-display font-bold">WATCH</h3>
+<p class="text-on-surface-variant mt-4 text-sm leading-relaxed">Continuous ingestion and mapping of your entire SBOM ecosystem. Real-time monitoring of upstreams, registry changes, and maintainer signals.</p>
+</div>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-surface text-[10px] font-mono text-primary border border-primary/20 rounded">SBOM SCAN</span>
+<span class="px-2 py-1 bg-surface text-[10px] font-mono text-primary border border-primary/20 rounded">VEX MAPPING</span>
+</div>
+</div>
+<!-- HUNT -->
+<div class="border-glow-card p-8 flex flex-col h-full" style="--glow-color: var(--glow-blue)">
+<div class="mb-8">
+<span class="material-symbols-outlined text-4xl text-secondary mb-4">radar</span>
+<h3 class="text-2xl font-display font-bold">HUNT</h3>
+<p class="text-on-surface-variant mt-4 text-sm leading-relaxed">AI Agents perform active reachability analysis to filter noise. We don't just find vulnerabilities; we find the ones that are actually exploitable in your code.</p>
+</div>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-surface text-[10px] font-mono text-secondary border border-secondary/20 rounded">REACHABILITY</span>
+<span class="px-2 py-1 bg-surface text-[10px] font-mono text-secondary border border-secondary/20 rounded">MALWARE DETECT</span>
+</div>
+</div>
+<!-- DEFEND -->
+<div class="border-glow-card p-8 flex flex-col h-full" style="--glow-color: var(--glow-red)">
+<div class="mb-8">
+<span class="material-symbols-outlined text-4xl text-error mb-4">shield</span>
+<h3 class="text-2xl font-display font-bold">DEFEND</h3>
+<p class="text-on-surface-variant mt-4 text-sm leading-relaxed">Automated pull requests, virtual patching, and supply chain firewalls. Neutralize threats before they reach production environments.</p>
+</div>
+<div class="mt-auto flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-surface text-[10px] font-mono text-error border border-error/20 rounded">AUTO-PR</span>
+<span class="px-2 py-1 bg-surface text-[10px] font-mono text-error border border-error/20 rounded">GATEKEEPER</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 4: FLOWING MENU / SHOWCASE -->
+<section class="py-24 border-y border-white/5 overflow-hidden">
+<div class="marquee-container">
+<div class="marquee-content flex gap-12 items-center">
+<!-- Module 1 -->
+<div class="flex items-center gap-12 shrink-0">
+<span class="text-8xl font-display font-extrabold text-white/5 uppercase select-none">INTELLIGENCE</span>
+<div class="w-[500px] h-[300px] bg-gradient-to-tr from-primary/20 to-surface-container rounded-xl flex items-center justify-center border border-white/10">
+<span class="text-primary/40 font-mono">MAP_VIEW_ACTIVE</span>
+</div>
+</div>
+<!-- Module 2 -->
+<div class="flex items-center gap-12 shrink-0">
+<span class="text-8xl font-display font-extrabold text-white/5 uppercase select-none">AUTOMATION</span>
+<div class="w-[500px] h-[300px] bg-gradient-to-tr from-secondary/20 to-surface-container rounded-xl flex items-center justify-center border border-white/10">
+<span class="text-secondary/40 font-mono">AGENT_HUNT_STREAM</span>
+</div>
+</div>
+<!-- Module 3 -->
+<div class="flex items-center gap-12 shrink-0">
+<span class="text-8xl font-display font-extrabold text-white/5 uppercase select-none">RESILIENCE</span>
+<div class="w-[500px] h-[300px] bg-gradient-to-tr from-error/20 to-surface-container rounded-xl flex items-center justify-center border border-white/10">
+<span class="text-error/40 font-mono">SECURE_DOCKER_V3</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 5: RESEARCH BACKING -->
+<section class="py-32 px-margin-page bg-[#09090F]">
+<div class="max-w-6xl mx-auto">
+<div class="border-glow-card p-12 md:p-20 flex flex-col md:flex-row gap-16 items-center" style="--glow-color: #fff">
+<div class="flex-1 space-y-8">
+<h3 class="text-3xl font-display font-bold">Grounded in Academic Security Research.</h3>
+<div class="space-y-6">
+<div class="p-4 bg-white/5 border-l-2 border-primary rounded-r">
+<p class="text-sm italic text-on-surface-variant">"Graph-based dependency analysis reduces false positive alerts by 67% in enterprise environments."</p>
+<p class="text-[10px] font-mono mt-2 text-primary">IEEE SECURITY &amp; PRIVACY, 2023</p>
+</div>
+<div class="p-4 bg-white/5 border-l-2 border-secondary rounded-r">
+<p class="text-sm italic text-on-surface-variant">"Autonomous agent swarms outperform static analysis in identifying non-CVE supply chain risks."</p>
+<p class="text-[10px] font-mono mt-2 text-secondary">ACM SIGSAC RESEARCH, 2024</p>
+</div>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center text-center">
+<div class="text-8xl font-display font-bold text-white mb-2">48%</div>
+<div class="text-sm font-mono text-on-surface-variant uppercase tracking-widest">Higher Detection Rate</div>
+<div class="mt-4 text-xs text-on-surface-variant/60 max-w-[200px]">Compared to traditional SCA tooling in head-to-head testing.</div>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION 6: FINAL CTA -->
+<section class="py-40 relative px-margin-page overflow-hidden">
+<div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(124,58,237,0.15)_0%,transparent_70%)]"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<h2 class="text-5xl md:text-7xl font-display mb-12">
+<span class="block font-extrabold text-white">Shield your supply chain.</span>
+<span class="block font-light text-on-surface-variant">Automate your defense.</span>
+</h2>
+<a class="inline-flex px-12 py-6 bg-white text-black font-display font-bold rounded-full hover:scale-105 transition-transform text-lg shadow-[0_0_40px_rgba(255,255,255,0.2)]" href="/dashboard">
+                GET STARTED FREE
+            </a>
+</div>
+</section>
+<!-- SECTION 7: FOOTER -->
+<footer class="py-20 border-t border-white/5 px-margin-page bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto">
+<div class="grid md:grid-cols-4 gap-12 mb-20">
+<div class="col-span-1 md:col-span-2">
+<div class="flex items-center gap-2 mb-6">
+<span class="font-display font-bold text-2xl tracking-tighter">THREAT<span class="text-primary-container">MESH</span></span>
+</div>
+<p class="text-sm text-on-surface-variant max-w-sm leading-relaxed">
+                        The next generation of autonomous security for software supply chains. Building a resilient digital ecosystem through agentic intelligence.
+                    </p>
+</div>
+<div>
+<h4 class="text-[11px] font-mono font-bold text-white uppercase tracking-widest mb-6">Capabilities</h4>
+<ul class="space-y-4 text-sm text-on-surface-variant">
+<li><a class="hover:text-white transition-colors" href="#">SBOM Intelligence</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Reachability Analysis</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Auto-Remediation</a></li>
+<li><a class="hover:text-white transition-colors" href="#">VEX Management</a></li>
+</ul>
+</div>
+<div>
+<h4 class="text-[11px] font-mono font-bold text-white uppercase tracking-widest mb-6">Resource</h4>
+<ul class="space-y-4 text-sm text-on-surface-variant">
+<li><a class="hover:text-white transition-colors" href="#">Technical Docs</a></li>
+<li><a class="hover:text-white transition-colors" href="#">API Reference</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Open Source</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Contact Support</a></li>
+</ul>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 gap-6">
+<div class="flex gap-8 font-mono text-[10px] text-on-surface-variant/40">
+<span>© 2024 THREATMESH AI</span>
+<span>ALL SYSTEMS NOMINAL</span>
+</div>
+<div class="font-mono text-[10px] text-primary/60">
+                    [SECURE_TERMINAL_V9.24_PROD]
+                </div>
+</div>
+</div>
+</footer>
+<script>
+        // Simple entrance animations using intersection observer (poor man's framer motion)
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section > div').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)';
+            observer.observe(el);
+        });
+    </script>
+</body></html>

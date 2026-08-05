@@ -1,169 +1,335 @@
+// frontend/app/page.tsx
 'use client';
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
-import { UploadCloud, Shield, AlertTriangle, Bug, GitPullRequest } from 'lucide-react';
-import { uploadSBOM, triggerScan } from '@/lib/api';
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { uploadSBOM, getScanStatus, getPackages, getPredictions, getPlaybooks, getCVEs, getDashboardData } from '@/lib/api';
+import { useWebSocket } from '@/lib/websocket';
+import { ScanStatus, Package, PredictedRisk, Playbook } from '@/types';
+import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
+
 import SummaryRow from '@/components/dashboard/SummaryRow';
 import CyberHealthGauge from '@/components/dashboard/CyberHealthGauge';
 import TrustDistributionChart from '@/components/dashboard/TrustDistributionChart';
-import CriticalPackagesTable from '@/components/dashboard/CriticalPackagesTable';
 import LiveFeed from '@/components/dashboard/LiveFeed';
-import PlaybookCard from '@/components/dashboard/PlaybookCard';
-import AIHealthPanel from '@/components/dashboard/AIHealthPanel';
-import type { Package, LiveFeedEvent, Playbook, AIHealthMetrics, TrustDistribution } from '@/types';
+import ADTGTrustGraph from '@/components/dashboard/ADTGTrustGraph';
+import InteractiveDependencyGraph from '@/components/dashboard/InteractiveDependencyGraph';
+import AttackReplayTimeline from '@/components/dashboard/AttackReplayTimeline';
+import CriticalPackagesTable from '@/components/dashboard/CriticalPackagesTable';
+import PredictedRiskPanel from '@/components/dashboard/PredictedRiskPanel';
+import PlaybookSection from '@/components/dashboard/PlaybookSection';
 
-const mockPackages: Package[] = [
-  { id: '1', name: 'log4j-core', version: '2.14.1', ecosystem: 'maven', purl: null, node_type: 'package', trust_score: 12, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '2', name: 'lodash', version: '4.17.20', ecosystem: 'npm', purl: null, node_type: 'package', trust_score: 35, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '3', name: 'Pillow', version: '9.0.0', ecosystem: 'pypi', purl: null, node_type: 'package', trust_score: 42, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '4', name: 'axios', version: '0.21.1', ecosystem: 'npm', purl: null, node_type: 'package', trust_score: 65, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '5', name: 'express', version: '4.17.1', ecosystem: 'npm', purl: null, node_type: 'package', trust_score: 72, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '6', name: 'react', version: '18.2.0', ecosystem: 'npm', purl: null, node_type: 'package', trust_score: 95, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '7', name: 'flask', version: '2.2.0', ecosystem: 'pypi', purl: null, node_type: 'package', trust_score: 88, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '8', name: 'django', version: '3.2.0', ecosystem: 'pypi', purl: null, node_type: 'package', trust_score: 82, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '9', name: 'node-fetch', version: '2.6.1', ecosystem: 'npm', purl: null, node_type: 'package', trust_score: 58, first_seen: new Date().toISOString(), dependencies: [] },
-  { id: '10', name: 'minimist', version: '1.2.5', ecosystem: 'npm', purl: null, node_type: 'package', trust_score: 48, first_seen: new Date().toISOString(), dependencies: [] },
-];
+import { Shield, Upload, FileText, Clock, Users, Loader2, AlertCircle, Eye, Radar, ShieldAlert, Zap } from 'lucide-react';
 
-const mockEvents: LiveFeedEvent[] = [
-  { event_type: 'cve_detected', title: 'Critical CVE Detected', description: 'CVE-2021-44228 (Log4Shell) in log4j-core 2.14.1', severity: 'critical', timestamp: new Date().toISOString(), data: {} },
-  { event_type: 'trust_updated', title: 'Trust Score Updated', description: 'log4j-core dropped from 65 to 12', severity: 'warning', timestamp: new Date(Date.now() - 60000).toISOString(), data: {} },
-  { event_type: 'scan_completed', title: 'Scan Complete', description: '16 packages analyzed, 3 at risk', severity: 'info', timestamp: new Date(Date.now() - 120000).toISOString(), data: {} },
-  { event_type: 'playbook_created', title: 'Playbook Generated', description: 'AI Council remediation for lodash', severity: 'info', timestamp: new Date(Date.now() - 180000).toISOString(), data: {} },
-];
+const ASCIIText = dynamic(() => import('@/components/ui/ASCIIText'), {
+  ssr: false,
+  loading: () => <h1 className="text-4xl font-extrabold text-[#7c3aed] font-['Space_Grotesk']">THREATMESH AI</h1>
+});
 
-const mockPlaybook: Playbook = {
-  id: 'pb-1', scan_id: 'demo', package_name: 'log4j-core',
-  threat_summary: 'CVE-2021-44228 (Log4Shell) is a critical RCE vulnerability in Apache Log4j allowing attackers to execute arbitrary code via crafted log messages using JNDI lookups.',
-  business_impact: 'All services using Java logging are at risk. Potential for complete system compromise, data exfiltration, and ransomware deployment. Blast radius: entire backend infrastructure.',
-  trust_explanation: 'Trust score of 12/100 driven by: Critical CVE (-40), public exploit available (-20), high EPSS score 0.97 (-24). Only maintainer health (+15%) prevents score from reaching zero.',
-  recommended_action: 'Immediately upgrade log4j-core from 2.14.1 to 2.17.1. This is a patch-level upgrade with no breaking changes. Apply WAF rules to block JNDI lookup patterns as interim mitigation.',
-  compliance_mapping: { 'NIST CSF': 'Identify, Protect, Respond', 'MITRE ATT&CK': 'T1195 Supply Chain', 'OWASP': 'A06 Vulnerable Components', 'EU AI Act': 'N/A' },
-  confidence_score: 94, evidence_citations: ['NVD CVE-2021-44228', 'GHSA-jfh8-c2jp-5v3q', 'OSV GHSA-jfh8'],
-  created_at: new Date().toISOString(),
-};
+export default function ExecutiveDashboardPage() {
+  const shouldReduceMotion = useReducedMotion();
+  useWebSocket();
 
-const mockDistribution: TrustDistribution = { trusted: 4, watch: 3, at_risk: 3 };
+  const [activeScanId, setActiveScanId] = useState<string | null>(null);
+  const [scanStatus, setScanStatus] = useState<ScanStatus | null>(null);
+  const [packages, setPackages] = useState<Package[]>([]);
+  const [cves, setCves] = useState<any[]>([]);
+  const [predictions, setPredictions] = useState<PredictedRisk[]>([]);
+  const [playbooks, setPlaybooks] = useState<Playbook[]>([]);
 
-const mockAIHealth: AIHealthMetrics = {
-  hallucination_rate: 2.1, unsafe_prompts_blocked: 14, total_prompts: 342,
-  policy_violations: 3, ai_attack_attempts: 7, compliance_score: 94.5,
-  safety_score: 91.2, jailbreak_resistance: 97.8, bias_score: 95.3,
-};
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
-export default function Home() {
-  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
 
-  const handleFile = useCallback(async (file: File) => {
-    setIsUploading(true);
-    try {
-      const result = await uploadSBOM(file);
-      if (result.scan_id) {
-        router.push(`/scan/${result.scan_id}`);
-      }
-    } catch {
-      // On API error, navigate to demo scan
-      router.push('/scan/demo-scan-id');
-    } finally {
-      setIsUploading(false);
-    }
-  }, [router]);
-
-  const handleDrop = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragOver(false);
-    const file = e.dataTransfer.files[0];
-    if (file && file.name.endsWith('.json')) handleFile(file);
-  }, [handleFile]);
-
-  const handleFixPackage = useCallback((packageName: string) => {
-    alert(`Generating PR to fix ${packageName}...`);
+  useEffect(() => {
+    const stored = localStorage.getItem('active_scan_id') || localStorage.getItem('scan_id') || 'default';
+    setActiveScanId(stored);
   }, []);
 
+  const fetchDashboardData = useCallback(async (scanId: string) => {
+    try {
+      const [status, pkgs, fetchedCves, preds, pbs, dashData] = await Promise.all([
+        getScanStatus(scanId).catch(() => null),
+        getPackages(scanId).catch(() => []),
+        getCVEs(scanId).catch(() => []),
+        getPredictions(scanId).catch(() => []),
+        getPlaybooks(scanId).catch(() => []),
+        getDashboardData(scanId).catch(() => null)
+      ]);
+
+      if (status) setScanStatus(status);
+
+      let finalPkgs = pkgs && pkgs.length > 0 ? pkgs : (dashData?.critical_packages || []);
+      if ((!finalPkgs || finalPkgs.length === 0) && scanId === 'default') {
+        finalPkgs = [
+          { id: "pkg-1", name: "log4j-core", version: "2.14.1", ecosystem: "maven", trust_score: 10.0, node_type: "package", dependencies: ["log4j-api"], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-2", name: "struts2-core", version: "2.3.12", ecosystem: "maven", trust_score: 15.0, node_type: "package", dependencies: ["ognl"], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-3", name: "spring-core", version: "5.3.17", ecosystem: "maven", trust_score: 25.0, node_type: "package", dependencies: [], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-4", name: "jackson-databind", version: "2.9.8", ecosystem: "maven", trust_score: 42.0, node_type: "package", dependencies: [], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-5", name: "axios", version: "0.21.1", ecosystem: "npm", trust_score: 68.0, node_type: "package", dependencies: [], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-6", name: "lodash", version: "4.17.21", ecosystem: "npm", trust_score: 92.0, node_type: "package", dependencies: [], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-7", name: "requests", version: "2.25.1", ecosystem: "pypi", trust_score: 88.0, node_type: "package", dependencies: [], first_seen: "2026-08-01", purl: null },
+          { id: "pkg-8", name: "urllib3", version: "1.26.4", ecosystem: "pypi", trust_score: 74.0, node_type: "package", dependencies: [], first_seen: "2026-08-01", purl: null }
+        ];
+      }
+      setPackages(finalPkgs || []);
+      setCves(fetchedCves && fetchedCves.length > 0 ? fetchedCves : (dashData?.recent_events || []));
+      setPredictions(preds && preds.length > 0 ? preds : (dashData?.predictions || []));
+      setPlaybooks(pbs && pbs.length > 0 ? pbs : (dashData?.playbooks || []));
+    } catch (e: unknown) {
+      console.error('Error fetching dashboard data:', e);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!activeScanId) return;
+
+    fetchDashboardData(activeScanId);
+    const interval = setInterval(() => {
+      fetchDashboardData(activeScanId);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, [activeScanId, fetchDashboardData]);
+
+  const handleFileUpload = async (file: File) => {
+    if (!file.name.endsWith('.json')) {
+      setUploadError('Please select a valid CycloneDX or SPDX JSON file.');
+      return;
+    }
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const res = await uploadSBOM(file);
+      if (res && res.scan_id) {
+        localStorage.setItem('active_scan_id', res.scan_id);
+        localStorage.setItem('scan_id', res.scan_id);
+        setActiveScanId(res.scan_id);
+        fetchDashboardData(res.scan_id);
+      }
+    } catch (err: unknown) {
+      const errorObj = err as { message?: string };
+      setUploadError(errorObj.message || 'Failed to upload SBOM file');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  };
+
+  const cyberHealthScore = React.useMemo(() => {
+    if (!packages || packages.length === 0) return 100;
+    const sum = packages.reduce((acc, p) => acc + (p.trust_score ?? 100), 0);
+    return sum / packages.length;
+  }, [packages]);
+
   return (
-    <main className="min-h-screen bg-[#0D1117] text-[#E6EDF3]">
-      <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
-        {/* Upload Section */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <div
-            onDrop={handleDrop}
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-8 bg-[#161B22] transition-all cursor-pointer text-center ${
-              isDragOver ? 'border-[#00C896] bg-[#00C896]/10' : 'border-[#30363D] hover:border-[#00C896]/50'
-            }`}
+    <div className="min-h-screen text-[#E4E1EA] p-6 space-y-6">
+      <AnimatePresence mode="wait">
+        {!activeScanId ? (
+          /* =========================================================================
+             STATE 1: GOOGLE STITCH ENTRY TERMINAL HERO & SBOM UPLOAD ZONE
+             ========================================================================= */
+          <motion.div
+            key="empty-state"
+            initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.4 }}
+            className="relative flex flex-col items-center justify-center min-h-[85vh] max-w-4xl mx-auto text-center px-4"
           >
-            <UploadCloud size={40} className={isDragOver ? 'text-[#00C896] mx-auto' : 'text-[#8B949E] mx-auto'} />
-            <p className="text-lg font-semibold mt-3">Upload SBOM to Begin Scan</p>
-            <p className="text-sm text-[#8B949E] mt-1">Drag & drop CycloneDX or SPDX JSON, or click to browse</p>
-            {isUploading && <p className="text-[#00C896] mt-3 animate-pulse font-medium">Uploading and initializing scan...</p>}
-            <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) handleFile(f);
-            }} />
-          </div>
-        </motion.div>
+            {/* ASCII Text Canvas Component Title */}
+            <div className="relative w-full h-32 mb-4 overflow-hidden rounded-2xl flex items-center justify-center">
+              <ErrorBoundary fallback={<h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white font-['Space_Grotesk']">THREATMESH AI</h1>}>
+                <ASCIIText
+                  text="THREATMESH AI"
+                  asciiFontSize={7}
+                  textFontSize={160}
+                  textColor="#7c3aed"
+                  enableWaves={true}
+                />
+              </ErrorBoundary>
+            </div>
 
-        {/* Dashboard Header */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="flex items-center gap-3">
-          <Shield className="text-[#00C896]" size={28} />
-          <h2 className="text-2xl font-bold">Executive Dashboard</h2>
-          <span className="text-sm text-[#8B949E] ml-auto">Live Demo Data</span>
-        </motion.div>
+            {/* Subtitle */}
+            <p className="font-[#Space_Grotesk'] text-lg text-[#ccc3d8] max-w-xl mb-8 tracking-tight font-medium">
+              Autonomous Software Supply Chain Defense Platform
+            </p>
 
-        {/* Summary Row */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <SummaryRow totalPackages={16} atRiskCount={3} activeCVEs={5} openPRs={2} />
-        </motion.div>
+            {/* Stitch BorderGlow Card Hero Upload Container */}
+            <div className="border-glow-card w-full max-w-2xl p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl backdrop-blur-2xl">
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`w-full bg-[#0e0e14]/90 border-2 border-dashed rounded-xl p-8 sm:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group ${
+                  isDragging
+                    ? 'border-[#7c3aed] bg-[#7c3aed]/10 scale-[1.01]'
+                    : 'border-[#2D2D5E] hover:border-[#7c3aed] hover:bg-[#141428]'
+                }`}
+              >
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                  className="hidden"
+                />
 
-        {/* Two Column: Gauges + Live Feed */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CyberHealthGauge score={72} />
-            <TrustDistributionChart distribution={mockDistribution} />
+                <div className="w-16 h-16 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/40 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#7c3aed]/30 transition-all">
+                  {uploading ? (
+                    <Loader2 className="animate-spin text-[#7c3aed]" size={32} />
+                  ) : (
+                    <Upload className="text-[#7c3aed]" size={32} />
+                  )}
+                </div>
+
+                <h3 className="font-['Space_Grotesk'] text-xl font-bold text-white mb-2">
+                  {uploading ? 'Ingesting SBOM & Parallel Threat Intelligence...' : 'Upload CycloneDX / SPDX SBOM'}
+                </h3>
+                <p className="text-sm text-[#8a809b] max-w-md mb-4">
+                  Drag and drop your SBOM JSON file here, or click to browse. ThreatMesh will parse components and query NVD, OSV.dev & GitHub Advisories in parallel.
+                </p>
+
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a1a2e] text-[#a78bfa] rounded-full text-xs font-mono border border-[#7c3aed]/30">
+                  <Shield size={12} /> Supports CycloneDX 1.4/1.5 & SPDX 2.2/2.3 JSON
+                </span>
+              </div>
+
+              {uploadError && (
+                <div className="mt-4 p-3 bg-red-950/60 border border-red-500/50 rounded-lg text-red-200 text-xs font-mono flex items-center gap-2">
+                  <AlertCircle size={16} className="text-red-400 shrink-0" />
+                  <span>{uploadError}</span>
+                </div>
+              )}
+            </div>
           </motion.div>
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.5 }}>
-            <LiveFeed events={mockEvents} />
+        ) : (
+          /* =========================================================================
+             STATE 2: ACTIVE WATCH DASHBOARD
+             ========================================================================= */
+          <motion.div
+            key="active-dashboard"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="space-y-6"
+          >
+            {/* Dashboard Sub-Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#151526]/80 border border-[#1E1E3A] p-4 rounded-xl backdrop-blur-xl">
+              <div>
+                <h1 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2 font-['Space_Grotesk']">
+                  <Eye className="text-[#7C3AED]" size={24} /> MODULE 1 — WATCH Executive Monitor
+                </h1>
+                <p className="text-xs text-[#ccc3d8] mt-0.5">Real-time autonomous defense status for scan: <span className="font-mono text-[#7C3AED] font-bold">{activeScanId}</span></p>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('active_scan_id');
+                    setActiveScanId(null);
+                  }}
+                  className="px-3.5 py-1.5 bg-[#1b1b21] hover:bg-[#2a2930] text-[#ccc3d8] hover:text-white text-xs font-mono font-bold rounded-lg border border-[#4a4455]/50 transition-colors"
+                >
+                  Clear Active Scan
+                </button>
+
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-1.5 bg-[#7C3AED] hover:bg-[#6d28d9] text-white text-xs font-mono font-bold rounded-lg shadow-lg transition-colors flex items-center gap-1.5"
+                >
+                  <Upload size={14} /> New SBOM
+                </button>
+
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Row 1: Summary Row */}
+            <SummaryRow
+              totalPackages={scanStatus?.total_packages || packages.length}
+              atRiskCount={scanStatus?.at_risk_count || packages.filter((p) => p.trust_score < 50).length}
+              activeCVEs={scanStatus?.cve_count || cves.length || packages.filter((p) => p.trust_score < 80).length}
+              openPRs={1}
+            />
+
+            {/* Row 2: Two-Column Main Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+              {/* Left Column (8 cols) */}
+              <div className="lg:col-span-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <CyberHealthGauge score={cyberHealthScore} />
+                  <TrustDistributionChart packages={packages} />
+                </div>
+              </div>
+
+              {/* Right Column (4 cols) */}
+              <div className="lg:col-span-4 space-y-6">
+                <LiveFeed packages={packages} cves={cves} scanId={activeScanId} />
+              </div>
+            </div>
+
+            {/* Feature 3: ADTG Dependency Trust Graph & 5-Signal Inspector */}
+            <div className="w-full">
+              <ADTGTrustGraph packages={packages} />
+            </div>
+
+            {/* Feature 4: Interactive Dependency Graph & Reachability Analysis */}
+            <div className="w-full">
+              <InteractiveDependencyGraph scanId={activeScanId} packages={packages} />
+            </div>
+
+            {/* Feature 6: Attack Replay Timeline */}
+            <div className="w-full">
+              <AttackReplayTimeline scanId={activeScanId} packages={packages} cves={cves} />
+            </div>
+
+            {/* Critical Packages Table */}
+            <div className="w-full">
+              <CriticalPackagesTable scanId={activeScanId} initialPackages={packages} />
+            </div>
+
+            {/* Predicted Risk Panel */}
+            <div className="w-full">
+              <PredictedRiskPanel scanId={activeScanId} initialPredictions={predictions} />
+            </div>
+
+            {/* Playbook Section */}
+            <div className="w-full">
+              <PlaybookSection scanId={activeScanId} initialPlaybooks={playbooks} />
+            </div>
           </motion.div>
-        </div>
-
-        {/* Critical Packages */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
-          <CriticalPackagesTable packages={mockPackages} onFix={handleFixPackage} />
-        </motion.div>
-
-        {/* AI Health */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}>
-          <AIHealthPanel metrics={mockAIHealth} />
-        </motion.div>
-
-        {/* Playbooks */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}>
-          <h3 className="text-xl font-bold mb-4">AI Council Playbooks</h3>
-          <PlaybookCard playbook={mockPlaybook} />
-        </motion.div>
-
-        {/* Feature Cards */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-          <div className="p-6 bg-[#161B22] rounded-xl border border-[#30363D] hover:border-[#00C896]/50 transition-colors">
-            <h3 className="font-bold mb-2 text-[#00C896]">Adaptive Trust Graph</h3>
-            <p className="text-sm text-[#8B949E]">Real-time dependency scoring using multi-dimensional threat intel from NVD, OSV, and GHSA.</p>
-          </div>
-          <div className="p-6 bg-[#161B22] rounded-xl border border-[#30363D] hover:border-[#F0A500]/50 transition-colors">
-            <h3 className="font-bold mb-2 text-[#F0A500]">AI Governance & Safety</h3>
-            <p className="text-sm text-[#8B949E]">Monitor LLM interactions, enforce policies, detect prompt injection, and audit every decision.</p>
-          </div>
-          <div className="p-6 bg-[#161B22] rounded-xl border border-[#30363D] hover:border-[#E84040]/50 transition-colors">
-            <h3 className="font-bold mb-2 text-[#E84040]">Auto-Remediation</h3>
-            <p className="text-sm text-[#8B949E]">8-agent AI Council generates playbooks and creates GitHub PRs with safe patch versions.</p>
-          </div>
-        </motion.div>
-      </div>
-    </main>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

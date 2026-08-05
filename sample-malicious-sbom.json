@@ -1,0 +1,214 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.4",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2024-08-03T12:00:00Z",
+    "component": {
+      "type": "application",
+      "name": "enterprise-threatmesh-soc",
+      "version": "2.4.0",
+      "bom-ref": "enterprise-threatmesh-soc@2.4.0",
+      "description": "Enterprise SOC Mission Critical Microservice Suite"
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "name": "log4j-core",
+      "version": "2.14.1",
+      "purl": "pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1",
+      "bom-ref": "log4j-core@2.14.1",
+      "scope": "required",
+      "description": "Apache Log4j Core Logging Framework",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "cdb70559f21469e38e82a6136e92b3a0e668a6f2f98888b15d2a6a9b400f918e"
+        }
+      ],
+      "licenses": [
+        { "license": { "id": "Apache-2.0" } }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "ua-parser-js",
+      "version": "0.7.28",
+      "purl": "pkg:npm/ua-parser-js@0.7.28",
+      "bom-ref": "ua-parser-js@0.7.28",
+      "scope": "required",
+      "description": "ANOMALY DETECTED: Compromised NPM account backdoor containing Trojan password stealer and Monero miner script.",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a1b2c3d4e5f67890badbeef1234567890abcdef1234567890abcdef123456789"
+        }
+      ]
+    },
+    {
+      "type": "library",
+      "name": "event-stream",
+      "version": "3.3.6",
+      "purl": "pkg:npm/event-stream@3.3.6",
+      "bom-ref": "event-stream@3.3.6",
+      "scope": "required",
+      "description": "ANOMALY DETECTED: Malicious maintainer handover (flatmap-stream) targeting cryptocurrency wallet key stealing."
+    },
+    {
+      "type": "library",
+      "name": "reqeusts",
+      "version": "2.28.1",
+      "purl": "pkg:pypi/reqeusts@2.28.1",
+      "bom-ref": "reqeusts@2.28.1",
+      "scope": "required",
+      "description": "ANOMALY DETECTED: Typosquatting package targeting PyPI 'requests'. Exfiltrates AWS keys and environment secrets to external C2 server."
+    },
+    {
+      "type": "library",
+      "name": "crossenv",
+      "version": "1.0.0",
+      "purl": "pkg:npm/crossenv@1.0.0",
+      "bom-ref": "crossenv@1.0.0",
+      "scope": "required",
+      "description": "ANOMALY DETECTED: Typosquatting package targeting NPM 'cross-env'. Sends environment variables to unverified remote IP."
+    },
+    {
+      "type": "library",
+      "name": "langchain",
+      "version": "0.0.190",
+      "purl": "pkg:pypi/langchain@0.0.190",
+      "bom-ref": "langchain@0.0.190",
+      "scope": "required",
+      "description": "AI SUPPLY CHAIN RISK: Vulnerable to indirect prompt injection and arbitrary code execution via PalChain & NumExpr deserializer."
+    },
+    {
+      "type": "library",
+      "name": "chromadb",
+      "version": "0.3.21",
+      "purl": "pkg:pypi/chromadb@0.3.21",
+      "bom-ref": "chromadb@0.3.21",
+      "scope": "required",
+      "description": "AI VECTOR DB: Unauthenticated remote code execution via unsafe unpickling of embedding vector indexes."
+    },
+    {
+      "type": "library",
+      "name": "llama-model-weights-v2",
+      "version": "7b-q4",
+      "purl": "pkg:hug/meta-llama/llama-2-7b@7b-q4",
+      "bom-ref": "llama-model-weights-v2@7b-q4",
+      "scope": "required",
+      "description": "AI MODEL ANOMALY: Mismatched SHA-256 tensor checksum. Suspected backdoor weights insertion."
+    },
+    {
+      "type": "library",
+      "name": "Pillow",
+      "version": "9.0.0",
+      "purl": "pkg:pypi/pillow@9.0.0",
+      "bom-ref": "Pillow@9.0.0",
+      "scope": "required",
+      "description": "Python Imaging Library with critical heap buffer overflow in FLI image decoder."
+    },
+    {
+      "type": "library",
+      "name": "lodash",
+      "version": "4.17.20",
+      "purl": "pkg:npm/lodash@4.17.20",
+      "bom-ref": "lodash@4.17.20",
+      "scope": "required",
+      "description": "Lodash Prototype Pollution vulnerability (CVE-2021-23337)."
+    },
+    {
+      "type": "library",
+      "name": "axios",
+      "version": "0.21.1",
+      "purl": "pkg:npm/axios@0.21.1",
+      "bom-ref": "axios@0.21.1",
+      "scope": "required",
+      "description": "Axios Server-Side Request Forgery (SSRF) vulnerability."
+    },
+    {
+      "type": "library",
+      "name": "express",
+      "version": "4.17.1",
+      "purl": "pkg:npm/express@4.17.1",
+      "bom-ref": "express@4.17.1",
+      "scope": "required",
+      "description": "Express web server core framework."
+    },
+    {
+      "type": "library",
+      "name": "jsonwebtoken",
+      "version": "8.5.1",
+      "purl": "pkg:npm/jsonwebtoken@8.5.1",
+      "bom-ref": "jsonwebtoken@8.5.1",
+      "scope": "required",
+      "description": "JSON Web Token verification library."
+    },
+    {
+      "type": "library",
+      "name": "auth-jwt-service",
+      "version": "1.2.0",
+      "purl": "pkg:npm/auth-jwt-service@1.2.0",
+      "bom-ref": "auth-jwt-service@1.2.0",
+      "scope": "required",
+      "description": "Internal Enterprise Identity Auth Microservice."
+    },
+    {
+      "type": "library",
+      "name": "payment-gateway-sdk",
+      "version": "3.1.0",
+      "purl": "pkg:npm/payment-gateway-sdk@3.1.0",
+      "bom-ref": "payment-gateway-sdk@3.1.0",
+      "scope": "required",
+      "description": "Enterprise Billing & Credit Card Payment Processor SDK."
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "enterprise-threatmesh-soc@2.4.0",
+      "dependsOn": [
+        "express@4.17.1",
+        "auth-jwt-service@1.2.0",
+        "payment-gateway-sdk@3.1.0",
+        "langchain@0.0.190"
+      ]
+    },
+    {
+      "ref": "auth-jwt-service@1.2.0",
+      "dependsOn": [
+        "jsonwebtoken@8.5.1",
+        "ua-parser-js@0.7.28",
+        "reqeusts@2.28.1"
+      ]
+    },
+    {
+      "ref": "ua-parser-js@0.7.28",
+      "dependsOn": [
+        "event-stream@3.3.6",
+        "crossenv@1.0.0"
+      ]
+    },
+    {
+      "ref": "event-stream@3.3.6",
+      "dependsOn": [
+        "log4j-core@2.14.1"
+      ]
+    },
+    {
+      "ref": "payment-gateway-sdk@3.1.0",
+      "dependsOn": [
+        "axios@0.21.1",
+        "lodash@4.17.20"
+      ]
+    },
+    {
+      "ref": "langchain@0.0.190",
+      "dependsOn": [
+        "chromadb@0.3.21",
+        "llama-model-weights-v2@7b-q4",
+        "Pillow@9.0.0"
+      ]
+    }
+  ]
+}
