@@ -175,6 +175,11 @@ async def run_scan_pipeline(scan_id: str, packages, edges, app_state):
             pass
         await manager.send_live_event('scan_failed', 'Scan Failed', str(e), 'critical', {'scan_id': scan_id})
 
+@router.options('/upload-sbom')
+@router.options('/scan')
+async def options_scan():
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
 @router.post('/upload-sbom', response_model=ScanResponse)
 @router.post('/scan', response_model=ScanResponse)
 async def upload_sbom(file: UploadFile, request: Request, background_tasks: BackgroundTasks):
