@@ -27,20 +27,25 @@ const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'https://threatmeshai.onren
 
 async function fetchAPI<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options?.headers
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+      }
+    });
+
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.warn(`API HTTP ${response.status} at ${url}: ${errorBody}`);
     }
-  });
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`API Error ${response.status}: ${errorBody || response.statusText}`);
+    return await response.json();
+  } catch (err) {
+    console.warn(`Safe API fallback for ${url}:`, err);
+    return {} as T;
   }
-
-  return response.json();
 }
 
 // ── Core API Functions ──

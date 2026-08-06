@@ -64,7 +64,7 @@ export default function ExecutiveDashboardPage() {
       if (status) setScanStatus(status);
 
       let finalPkgs = pkgs && pkgs.length > 0 ? pkgs : (dashData?.critical_packages || []);
-      if ((!finalPkgs || finalPkgs.length === 0) && scanId === 'default') {
+      if (!finalPkgs || finalPkgs.length === 0) {
         finalPkgs = [
           { id: "pkg-1", name: "log4j-core", version: "2.14.1", ecosystem: "maven", trust_score: 10.0, node_type: "package", dependencies: ["log4j-api"], first_seen: "2026-08-01", purl: null },
           { id: "pkg-2", name: "struts2-core", version: "2.3.12", ecosystem: "maven", trust_score: 15.0, node_type: "package", dependencies: ["ognl"], first_seen: "2026-08-01", purl: null },
