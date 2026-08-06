@@ -80,7 +80,9 @@ export const wsClient = new WebSocketClient();
 
 export function useWebSocket() {
   useEffect(() => {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws';
+    const rawWs = process.env.NEXT_PUBLIC_WS_URL || 'wss://threatmeshai.onrender.com';
+    const baseWs = rawWs.replace(/\/+$/, '');
+    const wsUrl = baseWs.endsWith('/ws') ? baseWs : `${baseWs}/ws`;
     wsClient.connect(wsUrl);
     return () => {
       wsClient.disconnect();
