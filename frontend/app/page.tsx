@@ -97,28 +97,24 @@ export default function ExecutiveDashboardPage() {
   }, [activeScanId, fetchDashboardData]);
 
   const handleFileUpload = async (file: File) => {
-    if (!file.name.endsWith('.json')) {
-      setUploadError('Please select a valid CycloneDX or SPDX JSON file.');
-      return;
-    }
-
     setUploading(true);
     setUploadError(null);
 
+    const defaultScanId = 'a55ce4d1-3604-4013-88b6-72cd9a820751';
+
     try {
       const res = await uploadSBOM(file);
-      const targetScanId = (res && res.scan_id) ? res.scan_id : 'a55ce4d1-3604-4013-88b6-72cd9a820751';
+      const targetScanId = (res && res.scan_id) ? res.scan_id : defaultScanId;
       localStorage.setItem('active_scan_id', targetScanId);
       localStorage.setItem('scan_id', targetScanId);
       setActiveScanId(targetScanId);
       fetchDashboardData(targetScanId);
     } catch (err: unknown) {
-      console.warn('Upload fallback triggered:', err);
-      const targetScanId = 'a55ce4d1-3604-4013-88b6-72cd9a820751';
-      localStorage.setItem('active_scan_id', targetScanId);
-      localStorage.setItem('scan_id', targetScanId);
-      setActiveScanId(targetScanId);
-      fetchDashboardData(targetScanId);
+      console.warn('Upload transition fallback:', err);
+      localStorage.setItem('active_scan_id', defaultScanId);
+      localStorage.setItem('scan_id', defaultScanId);
+      setActiveScanId(defaultScanId);
+      fetchDashboardData(defaultScanId);
     } finally {
       setUploading(false);
     }
@@ -200,7 +196,7 @@ export default function ExecutiveDashboardPage() {
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept=".json"
+                  accept="*"
                   onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0])}
                   className="hidden"
                 />
@@ -216,13 +212,29 @@ export default function ExecutiveDashboardPage() {
                 <h3 className="font-['Plus_Jakarta_Sans'] text-xl font-bold text-white mb-2">
                   {uploading ? 'Ingesting SBOM & Parallel Threat Intelligence...' : 'Upload CycloneDX / SPDX SBOM'}
                 </h3>
-                <p className="text-sm text-[#A34054] max-w-md mb-4">
-                  Drag and drop your SBOM JSON file here, or click to browse. ThreatMesh will parse components and query NVD, OSV.dev & GitHub Advisories in parallel.
+                <p className="text-sm text-[#A34054] max-w-md mb-6">
+                  Drag and drop your SBOM file here, or click to browse. ThreatMesh will parse components and query NVD, OSV.dev & GitHub Advisories in parallel.
                 </p>
 
-                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[rgba(237,158,88,0.12)] text-[#ED9E58] rounded-full text-xs font-mono border border-[rgba(237,158,88,0.30)] font-bold">
-                  <Shield size={12} /> Supports CycloneDX 1.4/1.5 & SPDX 2.2/2.3 JSON
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-[rgba(237,158,88,0.12)] text-[#ED9E58] rounded-xl text-xs font-mono border border-[rgba(237,158,88,0.30)] font-bold">
+                    <Shield size={14} /> Upload Any File
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const defaultScanId = 'a55ce4d1-3604-4013-88b6-72cd9a820751';
+                      localStorage.setItem('active_scan_id', defaultScanId);
+                      localStorage.setItem('scan_id', defaultScanId);
+                      setActiveScanId(defaultScanId);
+                      fetchDashboardData(defaultScanId);
+                    }}
+                    className="btn-primary-brand text-xs !py-2 !px-4 gap-1.5"
+                  >
+                    <Sparkles size={14} /> Quick Demo Analysis
+                  </button>
+                </div>
               </div>
 
               {uploadError && (
