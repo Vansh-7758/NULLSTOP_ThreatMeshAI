@@ -2,8 +2,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Play, RotateCcw, GitCommit, FileCode2, Database, ShieldAlert, Network, Users, CheckCircle2, GitPullRequest, ArrowRight, Sparkles, ExternalLink, Activity } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Play, RotateCcw, GitCommit, FileCode2, Database, ShieldAlert, Network, Users, CheckCircle2, GitPullRequest, ArrowRight, ExternalLink, Activity } from 'lucide-react';
 
 interface Stage {
   id: number;
@@ -23,11 +23,10 @@ interface AttackReplayTimelineProps {
 }
 
 export default function AttackReplayTimeline({ scanId, packages = [], cves = [] }: AttackReplayTimelineProps) {
-  const [currentStage, setCurrentStage] = useState<number>(0); // 0 = idle, 1..8 = stages
+  const [currentStage, setCurrentStage] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [animatedScore, setAnimatedScore] = useState<number>(100.0);
 
-  // Identify target critical or sample package from current scan
   const lowestPkg = React.useMemo(() => {
     if (packages && packages.length > 0) {
       const sorted = [...packages].sort((a, b) => (a.trust_score ?? 100) - (b.trust_score ?? 100));
@@ -42,7 +41,6 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
   const totalCount = packages.length > 0 ? packages.length : 16;
   const secondPkg = packages.length > 1 ? packages[1] : { name: 'ua-parser-js', version: '0.7.28' };
 
-  // Auto-play timeline timer (600ms delay between stages)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying && currentStage < 8) {
@@ -55,7 +53,6 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
     return () => clearTimeout(timer);
   }, [isPlaying, currentStage]);
 
-  // Stage 4 animated score countdown effect
   useEffect(() => {
     if (currentStage >= 4) {
       let current = 100.0;
@@ -86,14 +83,14 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 1 — Developer Commits Code',
       subtitle: 'Developer pushes a new commit containing software dependency update',
       icon: GitCommit,
-      color: '#7c3aed',
+      color: '#ED9E58',
       badge: 'TRIGGER',
       timestamp: '00:00.000',
       details: (
-        <div className="font-mono text-xs text-[#ccc3d8] bg-[#0c0c16] p-2.5 rounded-lg border border-[#1f1f3a] space-y-1">
-          <p><span className="text-[#8a809b]">Commit SHA:</span> <span className="text-white font-bold">7f3b89a</span></p>
-          <p><span className="text-[#8a809b]">Branch:</span> <span className="text-[#a78bfa]">main</span> | <span className="text-[#8a809b]">Author:</span> dev@enterprise.com</p>
-          <p className="text-[#00c896]">+ Pushed updated SBOM / manifest to repository ({scanId || 'scan-active'})</p>
+        <div className="font-mono text-xs text-[#E9BCB9] bg-[rgba(11,13,27,0.70)] p-3 rounded-xl border border-[rgba(163,64,84,0.15)] space-y-1">
+          <p><span className="text-[#A34054]">Commit SHA:</span> <span className="text-white font-bold">7f3b89a</span></p>
+          <p><span className="text-[#A34054]">Branch:</span> <span className="text-[#ED9E58]">main</span> | <span className="text-[#A34054]">Author:</span> dev@enterprise.com</p>
+          <p className="text-[#22c55e]">+ Pushed updated SBOM / manifest to repository ({scanId || 'scan-active'})</p>
         </div>
       )
     },
@@ -102,32 +99,32 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 2 — SBOM Diffed & New Dependency Detected',
       subtitle: 'ThreatMesh ingests SBOM, diffs changes against baseline',
       icon: FileCode2,
-      color: '#3b82f6',
+      color: '#9A5FFD',
       badge: 'INGESTION',
       timestamp: '00:00.600',
       details: (
-        <div className="font-mono text-xs text-[#ccc3d8] bg-[#0c0c16] p-2.5 rounded-lg border border-[#1f1f3a] space-y-1">
-          <p className="text-[#00c896]">+ Analyzed: {targetName}@{targetVersion} ({lowestPkg.ecosystem || 'npm'})</p>
-          <p className="text-[#00c896]">+ Parsed: {secondPkg.name}@{secondPkg.version}</p>
-          <p className="text-[#8a809b]">Total {totalCount} packages parsed, dependency tree graph constructed.</p>
+        <div className="font-mono text-xs text-[#E9BCB9] bg-[rgba(11,13,27,0.70)] p-3 rounded-xl border border-[rgba(163,64,84,0.15)] space-y-1">
+          <p className="text-[#22c55e]">+ Analyzed: {targetName}@{targetVersion} ({lowestPkg.ecosystem || 'npm'})</p>
+          <p className="text-[#22c55e]">+ Parsed: {secondPkg.name}@{secondPkg.version}</p>
+          <p className="text-[#A34054]">Total {totalCount} packages parsed, dependency tree graph constructed.</p>
         </div>
       )
     },
     {
       id: 3,
-      title: 'Stage 3 — ThreatMesh Ingests Live Vulnerability Data',
+      title: 'Stage 3 — Live Threat Intelligence Sync',
       subtitle: 'Parallel live threat feed lookup across NVD, OSV.dev, & GitHub Advisories',
       icon: Database,
-      color: '#ffc107',
+      color: '#f59e0b',
       badge: 'THREAT INTEL',
       timestamp: '00:01.200',
       details: (
-        <div className="font-mono text-xs text-[#ccc3d8] bg-[#0c0c16] p-2.5 rounded-lg border border-[#1f1f3a] space-y-1">
-          <div className="flex items-center justify-between text-[#ff2a6d] font-bold">
+        <div className="font-mono text-xs text-[#E9BCB9] bg-[rgba(11,13,27,0.70)] p-3 rounded-xl border border-[rgba(163,64,84,0.15)] space-y-1">
+          <div className="flex items-center justify-between text-[#ef4444] font-bold">
             <span>Threat Flagged in {targetName}@{targetVersion}</span>
-            <span className="px-1.5 py-0.5 rounded bg-[#ff2a6d]/20 text-[10px] border border-[#ff2a6d]/50">CRITICAL / HIGH</span>
+            <span className="px-2 py-0.5 rounded-full bg-[rgba(239,68,68,0.15)] text-[10px] border border-[rgba(239,68,68,0.30)]">CRITICAL</span>
           </div>
-          <p className="text-[11px] text-[#ccc3d8]">EPSS Exploit Probability Evaluated | Public Exploit Signal Verified</p>
+          <p className="text-[11px] text-[#E9BCB9]/80">EPSS Exploit Probability Evaluated | Public Exploit Signal Verified</p>
         </div>
       )
     },
@@ -136,23 +133,20 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 4 — Real-Time Trust Score Degradation',
       subtitle: 'ADTG 5-Signal Engine calculates dynamic software credit score in real-time',
       icon: ShieldAlert,
-      color: '#ff2a6d',
+      color: '#ef4444',
       badge: 'ADTG SCORING',
       timestamp: '00:01.800',
       details: (
-        <div className="bg-[#0c0c16] p-3 rounded-lg border border-[#ff2a6d]/40 space-y-2">
+        <div className="bg-[rgba(11,13,27,0.70)] p-3 rounded-xl border border-[rgba(239,68,68,0.30)] space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-mono text-[#8a809b]">{targetName} Trust Score:</span>
-            <span className="text-xl font-mono font-extrabold text-[#ff2a6d] animate-pulse">
+            <span className="text-xs font-mono text-[#A34054]">{targetName} Trust Score:</span>
+            <span className="text-xl font-mono font-extrabold text-[#ef4444] animate-pulse">
               {animatedScore.toFixed(1)} / 100.0
             </span>
           </div>
-          <div className="w-full h-2 bg-[#1f1f3a] rounded-full overflow-hidden">
-            <div className="h-full bg-[#ff2a6d] transition-all duration-75" style={{ width: `${animatedScore}%` }}></div>
+          <div className="w-full h-2 bg-[rgba(255,255,255,0.05)] rounded-full overflow-hidden">
+            <div className="h-full bg-[#ef4444] transition-all duration-75" style={{ width: `${animatedScore}%` }}></div>
           </div>
-          <p className="text-[10px] font-mono text-[#8a809b]">
-            Deductions: CVE Severity | EPSS Risk Signal | Public Exploit Verification
-          </p>
         </div>
       )
     },
@@ -161,18 +155,18 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 5 — Graph Reachability Discovers Attack Path',
       subtitle: 'Cypher graph walk identifies exposed route from public API entrypoint',
       icon: Network,
-      color: '#ff2a6d',
+      color: '#ef4444',
       badge: 'REACHABILITY',
       timestamp: '00:02.400',
       details: (
-        <div className="font-mono text-xs text-[#ccc3d8] bg-[#0c0c16] p-2.5 rounded-lg border border-[#ff2a6d]/50 space-y-1">
-          <span className="text-[#ff2a6d] font-bold block mb-1">REACHABLE ATTACK PATH IDENTIFIED:</span>
+        <div className="font-mono text-xs text-[#E9BCB9] bg-[rgba(11,13,27,0.70)] p-3 rounded-xl border border-[rgba(239,68,68,0.30)] space-y-1">
+          <span className="text-[#ef4444] font-bold block mb-1">REACHABLE ATTACK PATH IDENTIFIED:</span>
           <div className="flex items-center gap-1.5 flex-wrap text-[11px]">
-            <span className="px-2 py-0.5 rounded bg-[#1f1f3a] text-white">Public API</span>
-            <ArrowRight size={12} className="text-[#ff2a6d]" />
-            <span className="px-2 py-0.5 rounded bg-[#1f1f3a] text-white">Gateway</span>
-            <ArrowRight size={12} className="text-[#ff2a6d]" />
-            <span className="px-2 py-0.5 rounded bg-[#ff2a6d]/20 text-[#ff2a6d] font-bold border border-[#ff2a6d]/50">{targetName}@{targetVersion}</span>
+            <span className="px-2.5 py-0.5 rounded-md bg-[rgba(27,25,49,0.90)] text-white border border-[rgba(163,64,84,0.25)]">Public API</span>
+            <ArrowRight size={12} className="text-[#ef4444]" />
+            <span className="px-2.5 py-0.5 rounded-md bg-[rgba(27,25,49,0.90)] text-white border border-[rgba(163,64,84,0.25)]">Gateway</span>
+            <ArrowRight size={12} className="text-[#ef4444]" />
+            <span className="px-2.5 py-0.5 rounded-md bg-[rgba(239,68,68,0.15)] text-[#ef4444] font-bold border border-[rgba(239,68,68,0.35)]">{targetName}@{targetVersion}</span>
           </div>
         </div>
       )
@@ -182,13 +176,13 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 6 — Multi-Agent AI Council Convenes',
       subtitle: '8 specialized AI agents analyze threat context, business impact & compliance',
       icon: Users,
-      color: '#a78bfa',
+      color: '#9A5FFD',
       badge: 'AI COUNCIL',
       timestamp: '00:03.000',
       details: (
-        <div className="grid grid-cols-4 gap-1.5 font-mono text-[10px] text-center">
+        <div className="grid grid-cols-4 gap-2 font-mono text-[10px] text-center">
           {['Threat', 'Risk', 'Trust', 'Patch', 'Compliance', 'Safety', 'Governance', 'Orchestrator'].map((agent) => (
-            <div key={agent} className="p-1 rounded bg-[#7c3aed]/20 text-[#c4b5fd] border border-[#7c3aed]/40 animate-pulse">
+            <div key={agent} className="p-1.5 rounded-lg bg-[rgba(154,95,253,0.15)] text-[#9A5FFD] border border-[rgba(154,95,253,0.30)] font-bold animate-pulse">
               {agent}
             </div>
           ))}
@@ -200,15 +194,15 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 7 — Patch Agent Recommends Verified Safe Version',
       subtitle: 'AI Council validates patch compatibility and verifies zero breaking changes',
       icon: CheckCircle2,
-      color: '#00c896',
+      color: '#22c55e',
       badge: 'RECOMMENDATION',
       timestamp: '00:03.600',
       details: (
-        <div className="font-mono text-xs text-[#ccc3d8] bg-[#0c0c16] p-2.5 rounded-lg border border-[#00c896]/50 space-y-1">
-          <p className="text-[#00c896] font-bold flex items-center gap-1">
+        <div className="font-mono text-xs text-[#E9BCB9] bg-[rgba(11,13,27,0.70)] p-3 rounded-xl border border-[rgba(34,197,94,0.35)] space-y-1">
+          <p className="text-[#22c55e] font-bold flex items-center gap-1">
             <CheckCircle2 size={13} /> Upgrade Recommended: log4j-core 2.14.1 → 2.17.1
           </p>
-          <p className="text-[11px] text-[#8a809b]">CVSS score resolved from 10.0 to 0.0. All 5 ADTG signals green.</p>
+          <p className="text-[11px] text-[#A34054]">CVSS score resolved from 10.0 to 0.0. All 5 ADTG signals green.</p>
         </div>
       )
     },
@@ -217,22 +211,22 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
       title: 'Stage 8 — Automated GitHub Pull Request Generated',
       subtitle: 'ThreatMesh generates automated zero-touch security remediation PR',
       icon: GitPullRequest,
-      color: '#00c896',
+      color: '#22c55e',
       badge: 'REMEDIATION',
       timestamp: '00:04.200',
       details: (
-        <div className="p-3 bg-[#00c896]/15 border border-[#00c896]/50 rounded-lg text-xs font-mono text-[#00c896] space-y-1.5">
+        <div className="p-3.5 bg-[rgba(34,197,94,0.12)] border border-[rgba(34,197,94,0.35)] rounded-xl text-xs font-mono text-[#22c55e] space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="font-bold flex items-center gap-1">
               <GitPullRequest size={14} /> Pull Request #42 Created
             </span>
-            <span className="text-[10px] px-2 py-0.5 rounded bg-[#00c896]/20 text-[#00c896]">CLOSED THREAT</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(34,197,94,0.20)] text-[#22c55e] font-bold">CLOSED THREAT</span>
           </div>
           <a
             href="https://github.com/threatmesh-ai/enterprise-app/pull/42"
             target="_blank"
             rel="noreferrer"
-            className="text-white underline hover:text-[#a78bfa] block truncate font-bold flex items-center gap-1"
+            className="text-white underline hover:text-[#ED9E58] block truncate font-bold flex items-center gap-1"
           >
             [Security Auto-Patch] Upgrade log4j-core to 2.17.1 <ExternalLink size={12} />
           </a>
@@ -242,37 +236,40 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
   ];
 
   return (
-    <div className="bg-[#0e0e14]/90 border border-[#2D2D5E] rounded-xl p-6 shadow-2xl backdrop-blur-xl space-y-6">
+    <div className="glass-card p-6 lg:p-8 space-y-6 relative overflow-hidden">
+      {/* Top accent line */}
+      <div
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ background: 'linear-gradient(90deg, transparent, #ED9E58, #9A5FFD, transparent)' }}
+      />
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E1E3A] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[rgba(163,64,84,0.15)] pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[rgba(237,158,88,0.12)] text-[#ED9E58] border border-[rgba(237,158,88,0.30)]">
               FEATURE 6
             </span>
-            <h2 className="font-['Space_Grotesk'] text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Activity className="text-[#7c3aed]" size={20} /> Attack Replay Timeline
+            <h2 className="font-['Plus_Jakarta_Sans'] text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <Activity className="text-[#ED9E58]" size={20} /> ATTACK REPLAY TIMELINE
             </h2>
           </div>
-          <p className="text-xs text-[#ccc3d8] mt-1">
+          <p className="text-xs text-[#A34054]">
             Visual 8-stage step-by-step animated sequence tracing supply chain attack detection from developer commit to automated PR fix.
           </p>
         </div>
 
-        {/* Action Replay Buttons */}
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={handleStartReplay}
-            className="px-4 py-2 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-mono font-bold rounded-lg shadow-lg transition-colors flex items-center gap-2"
-          >
-            {isPlaying ? <RotateCcw size={14} className="animate-spin" /> : <Play size={14} />}
-            {isPlaying ? 'Playing Sequence...' : currentStage > 0 ? 'Replay Timeline' : 'Play Attack Replay'}
-          </button>
-        </div>
+        <button
+          onClick={handleStartReplay}
+          className="btn-primary-brand text-xs font-bold gap-2 shrink-0"
+        >
+          {isPlaying ? <RotateCcw size={14} className="animate-spin" /> : <Play size={14} className="fill-current" />}
+          {isPlaying ? 'Playing Sequence...' : currentStage > 0 ? 'Replay Timeline' : 'Play Attack Replay'}
+        </button>
       </div>
 
       {/* Timeline Steps Layout */}
-      <div className="space-y-4">
+      <div className="space-y-3.5">
         {stages.map((stage) => {
           const Icon = stage.icon;
           const isActive = currentStage === stage.id;
@@ -287,38 +284,38 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
                 scale: isActive ? 1.01 : 1
               }}
               transition={{ duration: 0.3 }}
-              className={`p-4 rounded-xl border transition-all ${
+              className={`p-4 rounded-xl border transition-all duration-300 ${
                 isActive
-                  ? 'bg-[#18182c] border-[#7c3aed] shadow-lg ring-1 ring-[#7c3aed]/50'
+                  ? 'bg-[rgba(237,158,88,0.08)] border-[rgba(237,158,88,0.40)] shadow-[0_0_24px_rgba(237,158,88,0.12)]'
                   : isPassed
-                  ? 'bg-[#12121f] border-[#232345]'
-                  : 'bg-[#0c0c16]/60 border-[#1a1a2e]'
+                  ? 'bg-[rgba(27,25,49,0.70)] border-[rgba(163,64,84,0.18)]'
+                  : 'bg-[rgba(11,13,27,0.50)] border-[rgba(163,64,84,0.10)]'
               }`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-lg border flex items-center justify-center shrink-0 ${
-                    isActive ? 'bg-[#7c3aed]/30 border-[#7c3aed] text-white animate-pulse' : 'bg-[#18182c] border-[#2a2a4e] text-[#a78bfa]'
+                  <div className={`w-9 h-9 rounded-xl border flex items-center justify-center shrink-0 transition-colors ${
+                    isActive ? 'bg-[rgba(237,158,88,0.20)] border-[#ED9E58] text-[#ED9E58] animate-pulse' : 'bg-[rgba(27,25,49,0.80)] border-[rgba(163,64,84,0.25)] text-[#A34054]'
                   }`}>
                     <Icon size={18} />
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h4 className="text-sm font-bold text-white font-['Space_Grotesk']">
+                      <h4 className="text-sm font-bold text-white font-['Plus_Jakarta_Sans']">
                         {stage.title}
                       </h4>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#1a1a2e] text-[#a78bfa] border border-[#7c3aed]/30">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[rgba(237,158,88,0.12)] text-[#ED9E58] border border-[rgba(237,158,88,0.25)]">
                         {stage.badge}
                       </span>
                     </div>
-                    <p className="text-xs text-[#8a809b] mt-0.5">
+                    <p className="text-xs text-[#A34054] mt-0.5">
                       {stage.subtitle}
                     </p>
                   </div>
                 </div>
 
-                <span className="text-[10px] font-mono text-[#8a809b] shrink-0">
+                <span className="text-[10px] font-mono text-[#A34054] shrink-0 font-bold">
                   {stage.timestamp}
                 </span>
               </div>

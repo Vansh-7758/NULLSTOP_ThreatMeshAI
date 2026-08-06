@@ -190,12 +190,12 @@ class PlaybookFull(Playbook):
 
 class CopilotRequest(BaseModel):
     question: str
-    scan_id: str
+    scan_id: Optional[str] = None
 
 
 class CopilotResponse(BaseModel):
     answer: str
-    scan_id: str
+    scan_id: Optional[str] = None
     sources: list[str] = Field(default_factory=list)
 
 

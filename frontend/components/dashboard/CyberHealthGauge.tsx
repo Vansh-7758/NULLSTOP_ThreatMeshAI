@@ -1,150 +1,110 @@
 // frontend/components/dashboard/CyberHealthGauge.tsx
 'use client';
 
-import React, { useMemo } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { ShieldCheck, ShieldAlert, AlertTriangle } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ShieldCheck, AlertTriangle, ShieldAlert } from 'lucide-react';
 
 interface CyberHealthGaugeProps {
-  score?: number;
-  loading?: boolean;
-  error?: string | null;
-  onRetry?: () => void;
+  score: number;
 }
 
-export default function CyberHealthGauge({
-  score = 100,
-  loading = false,
-  error = null,
-  onRetry
-}: CyberHealthGaugeProps) {
-  const shouldReduceMotion = useReducedMotion();
+export default function CyberHealthGauge({ score }: CyberHealthGaugeProps) {
+  const normalizedScore = Math.min(Math.max(Math.round(score), 0), 100);
 
-  const clampedScore = useMemo(() => Math.max(0, Math.min(100, score)), [score]);
+  // Status classification
+  const getStatus = (s: number) => {
+    if (s >= 80) return { label: 'HEALTHY', color: '#22c55e', bg: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.30)', icon: ShieldCheck };
+    if (s >= 50) return { label: 'MODERATE RISK', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.30)', icon: AlertTriangle };
+    return { label: 'CRITICAL RISK', color: '#ef4444', bg: 'rgba(239,68,68,0.12)', border: 'rgba(239,68,68,0.30)', icon: ShieldAlert };
+  };
 
-  const { color, label, statusColor, IconComponent } = useMemo(() => {
-    if (clampedScore >= 80) {
-      return { color: '#00C896', label: 'Healthy', statusColor: 'text-[#00C896]', IconComponent: ShieldCheck };
-    } else if (clampedScore >= 60) {
-      return { color: '#F0A500', label: 'Caution', statusColor: 'text-[#F0A500]', IconComponent: AlertTriangle };
-    } else {
-      return { color: '#E84040', label: 'At Risk', statusColor: 'text-[#E84040]', IconComponent: ShieldAlert };
-    }
-  }, [clampedScore]);
+  const status = getStatus(normalizedScore);
+  const StatusIcon = status.icon;
 
-  // Gauge SVG math:
-  // Radius = 100, Center = (140, 140), StrokeWidth = 18
-  // 270 degrees arc: Circumference = 2 * PI * R = 628.318
-  // 270 deg of 360 deg = 0.75 * 628.318 = 471.239 total arc length
-  const radius = 100;
-  const circumference = 2 * Math.PI * radius; // ~628.3
-  const totalArcLength = 0.75 * circumference; // ~471.2
-  const filledArcLength = (clampedScore / 100) * totalArcLength;
-  const strokeDashoffset = totalArcLength - filledArcLength;
-
-  if (loading) {
-    return (
-      <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 h-[380px] flex flex-col items-center justify-center relative overflow-hidden">
-        <div className="w-[280px] h-[280px] relative flex items-center justify-center">
-          <svg width="280" height="280" viewBox="0 0 280 280" className="transform rotate-[135deg]">
-            <circle
-              cx="140"
-              cy="140"
-              r={radius}
-              fill="transparent"
-              stroke="#30363D"
-              strokeWidth="18"
-              strokeDasharray={`${totalArcLength} ${circumference}`}
-              strokeLinecap="round"
-              className="animate-pulse opacity-40"
-            />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="h-10 w-20 bg-[#30363D] rounded animate-pulse mb-2" />
-            <div className="h-4 w-32 bg-[#30363D] rounded animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 h-[380px] flex flex-col items-center justify-center text-center">
-        <ShieldAlert className="text-[#E84040] mb-3" size={40} />
-        <p className="text-[#E6EDF3] font-semibold text-base mb-1">Failed to calculate health score</p>
-        <p className="text-[#8B949E] text-xs mb-4">{error}</p>
-        {onRetry && (
-          <button
-            onClick={onRetry}
-            className="px-4 py-1.5 bg-[#30363D] hover:bg-[#8B949E]/20 text-[#E6EDF3] text-xs font-medium rounded-lg transition-colors"
-          >
-            Retry
-          </button>
-        )}
-      </div>
-    );
-  }
+  // Arc calculation
+  const r = 54;
+  const circumference = Math.PI * r;
+  const strokeDashoffset = circumference * (1 - normalizedScore / 100);
 
   return (
-    <motion.div
-      initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4 }}
-      className="bg-[#161B22] border border-[#30363D] rounded-xl p-6 flex flex-col items-center justify-between h-[380px] relative"
-    >
-      <div className="w-full flex items-center justify-between">
-        <h3 className="text-base font-semibold text-[#E6EDF3]">Overall Health</h3>
-        <span className="text-xs text-[#8B949E]">System Posture</span>
+    <div className="glass-card p-6 flex flex-col items-center justify-between relative overflow-hidden h-full">
+      {/* Top accent line */}
+      <div
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ background: `linear-gradient(90deg, transparent, ${status.color}, transparent)` }}
+      />
+
+      <div className="w-full flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: status.color }} />
+          <h3 className="text-xs font-bold text-[#A34054] uppercase tracking-widest font-['Plus_Jakarta_Sans']">
+            COMPOSITE CYBER HEALTH
+          </h3>
+        </div>
+        <span
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-wider"
+          style={{ background: status.bg, border: `1px solid ${status.border}`, color: status.color }}
+        >
+          <StatusIcon size={12} />
+          {status.label}
+        </span>
       </div>
 
-      <div className="relative w-[280px] h-[250px] flex items-center justify-center mt-2">
-        <svg width="280" height="280" viewBox="0 0 280 280" className="transform rotate-[135deg]">
-          {/* Background Track Arc */}
-          <circle
-            cx="140"
-            cy="140"
-            r={radius}
-            fill="transparent"
-            stroke="#30363D"
-            strokeWidth="18"
-            strokeDasharray={`${totalArcLength} ${circumference}`}
+      {/* SVG Arc Gauge */}
+      <div className="relative w-48 h-28 my-2 flex items-center justify-center">
+        <svg viewBox="0 0 140 80" className="absolute inset-0 w-full h-full">
+          {/* Background Track */}
+          <path
+            d="M 10 70 A 60 60 0 0 1 130 70"
+            fill="none"
+            stroke="rgba(255,255,255,0.06)"
+            strokeWidth="12"
             strokeLinecap="round"
           />
-          {/* Animated Value Arc */}
-          <motion.circle
-            cx="140"
-            cy="140"
-            r={radius}
-            fill="transparent"
-            stroke={color}
-            strokeWidth="18"
-            strokeDasharray={`${totalArcLength} ${circumference}`}
-            initial={shouldReduceMotion ? false : { strokeDashoffset: totalArcLength }}
+          {/* Animated Gauge Arc */}
+          <motion.path
+            d="M 10 70 A 60 60 0 0 1 130 70"
+            fill="none"
+            stroke="url(#healthGaugeGradient)"
+            strokeWidth="12"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
             animate={{ strokeDashoffset }}
-            transition={{ type: 'spring', stiffness: 50, damping: 15 }}
-            strokeLinecap="round"
+            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
           />
+          <defs>
+            <linearGradient id="healthGaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ef4444" />
+              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#22c55e" />
+            </linearGradient>
+          </defs>
         </svg>
 
-        {/* Center Contents */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pt-2">
+        {/* Center Score Counter */}
+        <div className="absolute inset-x-0 bottom-1 flex flex-col items-center">
           <motion.span
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            key={clampedScore}
-            className="text-[48px] font-bold leading-none tracking-tight mb-1"
-            style={{ color }}
+            className="text-4xl font-extrabold text-white font-['Plus_Jakarta_Sans'] leading-none"
+            style={{ textShadow: `0 0 24px ${status.color}60` }}
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
           >
-            {Math.round(clampedScore)}
+            {normalizedScore}
           </motion.span>
-          <span className="text-[14px] text-[#8B949E] font-medium mb-1">Cyber Health Score</span>
-          <div className="flex items-center gap-1.5 mt-1">
-            <IconComponent size={16} style={{ color }} />
-            <span className={`text-xs font-bold uppercase tracking-wider ${statusColor}`}>{label}</span>
-          </div>
+          <span className="text-[10px] font-semibold text-[#A34054] uppercase tracking-wider mt-1">
+            out of 100
+          </span>
         </div>
       </div>
-    </motion.div>
+
+      <div className="w-full flex items-center justify-between text-[10px] font-semibold text-[#E9BCB9]/60 border-t border-[rgba(163,64,84,0.15)] pt-3 mt-2">
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#ef4444]" /> 0 - 49 Critical</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#f59e0b]" /> 50 - 79 Watch</span>
+        <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-[#22c55e]" /> 80 - 100 Safe</span>
+      </div>
+    </div>
   );
 }

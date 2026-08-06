@@ -19,8 +19,8 @@ class Settings(BaseSettings):
 
     # GitHub
     GITHUB_TOKEN: str = ""
-    GITHUB_REPO_OWNER: str = ""
-    GITHUB_REPO_NAME: str = ""
+    GITHUB_REPO_OWNER: str = "Anshul-052"
+    GITHUB_REPO_NAME: str = "OrchestrateAi"
 
     # Threat Intel
     NVD_API_KEY: str = ""

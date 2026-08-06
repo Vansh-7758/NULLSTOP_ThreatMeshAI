@@ -85,52 +85,52 @@ export default function CopilotPanel({ scanId }: CopilotPanelProps) {
             initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="w-[380px] h-[500px] bg-[#161B22] border border-[#30363D] rounded-2xl shadow-2xl flex flex-col overflow-hidden mb-3"
+            className="w-[380px] h-[500px] glass-card border border-[rgba(163,64,84,0.30)] rounded-2xl shadow-2xl flex flex-col overflow-hidden mb-3"
           >
             {/* Header */}
-            <div className="p-3.5 bg-[#0D1117] border-b border-[#30363D] flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-[#00C896]/10 text-[#00C896]">
+            <div className="p-4 bg-[rgba(11,13,27,0.90)] border-b border-[rgba(163,64,84,0.20)] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-xl bg-[rgba(237,158,88,0.15)] text-[#ED9E58] border border-[rgba(237,158,88,0.30)]">
                   <Sparkles size={16} />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold text-[#E6EDF3]">AI Security Copilot</h4>
-                  <span className="text-[10px] text-[#00C896] block font-mono">Scan Context Connected</span>
+                  <h4 className="text-xs font-bold text-white font-['Plus_Jakarta_Sans']">AI Security Copilot</h4>
+                  <span className="text-[10px] text-[#22c55e] block font-mono font-bold">Scan Context Connected</span>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsOpen(false)}
-                className="p-1 rounded-lg bg-[#30363D]/40 text-[#8B949E] hover:text-[#E6EDF3] hover:bg-[#30363D] transition-colors"
+                className="p-1.5 rounded-xl bg-[rgba(255,255,255,0.06)] text-[#A34054] hover:text-white hover:bg-[rgba(255,255,255,0.12)] transition-colors"
               >
                 <X size={16} />
               </button>
             </div>
 
             {/* Chat History Messages */}
-            <div className="flex-1 overflow-y-auto p-3.5 space-y-3 custom-scrollbar text-xs">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar text-xs">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={`flex gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   {msg.role === 'assistant' && (
-                    <div className="w-6 h-6 rounded-full bg-[#00C896]/15 border border-[#00C896]/30 text-[#00C896] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Bot size={13} />
+                    <div className="w-7 h-7 rounded-xl bg-[rgba(237,158,88,0.15)] border border-[rgba(237,158,88,0.30)] text-[#ED9E58] flex items-center justify-center shrink-0 mt-0.5">
+                      <Bot size={14} />
                     </div>
                   )}
 
                   <div
-                    className={`max-w-[80%] rounded-xl p-3 leading-relaxed ${
+                    className={`max-w-[80%] rounded-2xl p-3 leading-relaxed ${
                       msg.role === 'user'
-                        ? 'bg-[#00C896] text-[#0D1117] font-semibold rounded-tr-none'
-                        : 'bg-[#0D1117] border border-[#30363D] text-[#E6EDF3] rounded-tl-none'
+                        ? 'bg-gradient-to-r from-[#ED9E58] to-[#A34054] text-[#1B1931] font-bold rounded-tr-none shadow-[0_0_20px_rgba(237,158,88,0.20)]'
+                        : 'bg-[rgba(11,13,27,0.80)] border border-[rgba(163,64,84,0.20)] text-[#E9BCB9] rounded-tl-none'
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                     <span
                       className={`text-[9px] block mt-1 text-right font-mono ${
-                        msg.role === 'user' ? 'text-[#0D1117]/70' : 'text-[#8B949E]'
+                        msg.role === 'user' ? 'text-[#1B1931]/70' : 'text-[#A34054]'
                       }`}
                     >
                       {msg.timestamp}
@@ -138,16 +138,16 @@ export default function CopilotPanel({ scanId }: CopilotPanelProps) {
                   </div>
 
                   {msg.role === 'user' && (
-                    <div className="w-6 h-6 rounded-full bg-[#30363D] text-[#E6EDF3] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <User size={13} />
+                    <div className="w-7 h-7 rounded-xl bg-[rgba(27,25,49,0.90)] border border-[rgba(163,64,84,0.25)] text-[#E9BCB9] flex items-center justify-center shrink-0 mt-0.5">
+                      <User size={14} />
                     </div>
                   )}
                 </div>
               ))}
 
               {isLoading && (
-                <div className="flex items-center gap-2 text-[#00C896] text-xs p-2">
-                  <Loader2 size={14} className="animate-spin" />
+                <div className="flex items-center gap-2 text-[#ED9E58] text-xs p-2 font-mono">
+                  <Loader2 size={14} className="animate-spin text-[#ED9E58]" />
                   <span>ThreatMesh Copilot reasoning...</span>
                 </div>
               )}
@@ -155,12 +155,12 @@ export default function CopilotPanel({ scanId }: CopilotPanelProps) {
             </div>
 
             {/* Quick Question Chips */}
-            <div className="px-3 py-1.5 bg-[#0D1117]/60 border-t border-[#30363D]/40 flex gap-1.5 overflow-x-auto custom-scrollbar">
+            <div className="px-3 py-2 bg-[rgba(11,13,27,0.80)] border-t border-[rgba(163,64,84,0.15)] flex gap-1.5 overflow-x-auto custom-scrollbar">
               {QUICK_QUESTIONS.map((q) => (
                 <button
                   key={q}
                   onClick={() => handleSend(q)}
-                  className="px-2 py-0.5 bg-[#161B22] hover:bg-[#30363D] text-[#8B949E] hover:text-[#E6EDF3] text-[10px] rounded-full border border-[#30363D] whitespace-nowrap transition-colors flex-shrink-0"
+                  className="px-2.5 py-1 bg-[rgba(27,25,49,0.70)] hover:bg-[rgba(237,158,88,0.12)] text-[#A34054] hover:text-[#ED9E58] text-[10px] font-mono rounded-full border border-[rgba(163,64,84,0.20)] whitespace-nowrap transition-colors shrink-0"
                 >
                   {q}
                 </button>
@@ -168,19 +168,19 @@ export default function CopilotPanel({ scanId }: CopilotPanelProps) {
             </div>
 
             {/* Input Box */}
-            <div className="p-3 bg-[#0D1117] border-t border-[#30363D] flex items-center gap-2">
+            <div className="p-3 bg-[rgba(11,13,27,0.90)] border-t border-[rgba(163,64,84,0.20)] flex items-center gap-2">
               <input
                 type="text"
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Ask about scan risks, CVEs..."
-                className="flex-1 bg-[#161B22] border border-[#30363D] rounded-xl px-3 py-2 text-xs text-[#E6EDF3] placeholder-[#8B949E] focus:outline-none focus:border-[#00C896]"
+                className="flex-1 bg-[rgba(27,25,49,0.90)] border border-[rgba(163,64,84,0.25)] rounded-xl px-3.5 py-2 text-xs text-white placeholder-[#A34054] focus:outline-none focus:border-[#ED9E58] transition-colors"
               />
               <button
                 disabled={!inputQuery.trim() || isLoading}
                 onClick={() => handleSend()}
-                className="p-2 bg-[#00C896] hover:bg-[#00a87d] text-[#0D1117] font-bold rounded-xl transition-colors disabled:opacity-50"
+                className="btn-primary-brand text-xs !py-2 !px-3 disabled:opacity-50"
               >
                 <Send size={14} />
               </button>
@@ -195,12 +195,12 @@ export default function CopilotPanel({ scanId }: CopilotPanelProps) {
           whileHover={shouldReduceMotion ? {} : { scale: 1.05 }}
           whileTap={shouldReduceMotion ? {} : { scale: 0.95 }}
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 rounded-full bg-[#00C896] hover:bg-[#00a87d] text-[#0D1117] shadow-2xl flex items-center justify-center font-bold transition-all relative"
+          className="w-14 h-14 rounded-2xl bg-gradient-to-r from-[#ED9E58] to-[#A34054] text-[#1B1931] shadow-[0_0_32px_rgba(237,158,88,0.40)] flex items-center justify-center font-bold transition-all relative"
         >
           <MessageCircle size={26} />
           <span className="absolute -top-1 -right-1 flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-white" />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-75" />
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-[#22c55e]" />
           </span>
         </motion.button>
       )}

@@ -19,12 +19,13 @@ import AttackReplayTimeline from '@/components/dashboard/AttackReplayTimeline';
 import CriticalPackagesTable from '@/components/dashboard/CriticalPackagesTable';
 import PredictedRiskPanel from '@/components/dashboard/PredictedRiskPanel';
 import PlaybookSection from '@/components/dashboard/PlaybookSection';
+import SectionDivider from '@/components/landing/ui/SectionDivider';
 
-import { Shield, Upload, FileText, Clock, Users, Loader2, AlertCircle, Eye, Radar, ShieldAlert, Zap } from 'lucide-react';
+import { Shield, Upload, Eye, Loader2, AlertCircle, Sparkles, RefreshCw } from 'lucide-react';
 
 const ASCIIText = dynamic(() => import('@/components/ui/ASCIIText'), {
   ssr: false,
-  loading: () => <h1 className="text-4xl font-extrabold text-[#7c3aed] font-['Space_Grotesk']">THREATMESH AI</h1>
+  loading: () => <h1 className="text-4xl sm:text-5xl font-extrabold text-[#ED9E58] font-['Plus_Jakarta_Sans'] tracking-tight">THREATMESH AI</h1>
 });
 
 export default function ExecutiveDashboardPage() {
@@ -144,11 +145,11 @@ export default function ExecutiveDashboardPage() {
   }, [packages]);
 
   return (
-    <div className="min-h-screen text-[#E4E1EA] p-6 space-y-6">
+    <div className="min-h-screen text-[#E9BCB9] p-6 lg:p-10 space-y-8 max-w-[1440px] mx-auto relative z-10">
       <AnimatePresence mode="wait">
         {!activeScanId ? (
           /* =========================================================================
-             STATE 1: GOOGLE STITCH ENTRY TERMINAL HERO & SBOM UPLOAD ZONE
+             STATE 1: hac333k STITCH ENTRY TERMINAL HERO & SBOM UPLOAD ZONE
              ========================================================================= */
           <motion.div
             key="empty-state"
@@ -156,37 +157,41 @@ export default function ExecutiveDashboardPage() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.4 }}
-            className="relative flex flex-col items-center justify-center min-h-[85vh] max-w-4xl mx-auto text-center px-4"
+            className="relative flex flex-col items-center justify-center min-h-[80vh] max-w-4xl mx-auto text-center px-4"
           >
-            {/* ASCII Text Canvas Component Title */}
+            {/* Ambient background bloom */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(237,158,88,0.12)_0%,transparent_65%)] pointer-events-none" />
+
+            {/* Title Canvas */}
             <div className="relative w-full h-32 mb-4 overflow-hidden rounded-2xl flex items-center justify-center">
-              <ErrorBoundary fallback={<h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white font-['Space_Grotesk']">THREATMESH AI</h1>}>
+              <ErrorBoundary fallback={<h1 className="text-4xl sm:text-5xl font-extrabold text-white font-['Plus_Jakarta_Sans']">THREATMESH AI</h1>}>
                 <ASCIIText
                   text="THREATMESH AI"
                   asciiFontSize={7}
                   textFontSize={160}
-                  textColor="#7c3aed"
+                  textColor="#ED9E58"
                   enableWaves={true}
                 />
               </ErrorBoundary>
             </div>
 
-            {/* Subtitle */}
-            <p className="font-[#Space_Grotesk'] text-lg text-[#ccc3d8] max-w-xl mb-8 tracking-tight font-medium">
+            <p className="font-['Plus_Jakarta_Sans'] text-lg text-[#E9BCB9] max-w-xl mb-8 tracking-tight font-medium">
               Autonomous Software Supply Chain Defense Platform
             </p>
 
-            {/* Stitch BorderGlow Card Hero Upload Container */}
-            <div className="border-glow-card w-full max-w-2xl p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl backdrop-blur-2xl">
+            {/* Hero Upload Glass Card */}
+            <div className="glass-card w-full max-w-2xl p-8 sm:p-10 flex flex-col items-center text-center shadow-2xl relative overflow-hidden">
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-transparent via-[#ED9E58] to-transparent" />
+
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
-                className={`w-full bg-[#0e0e14]/90 border-2 border-dashed rounded-xl p-8 sm:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group ${
+                className={`w-full bg-[rgba(11,13,27,0.80)] border-2 border-dashed rounded-2xl p-8 sm:p-10 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group ${
                   isDragging
-                    ? 'border-[#7c3aed] bg-[#7c3aed]/10 scale-[1.01]'
-                    : 'border-[#2D2D5E] hover:border-[#7c3aed] hover:bg-[#141428]'
+                    ? 'border-[#ED9E58] bg-[rgba(237,158,88,0.10)] scale-[1.01]'
+                    : 'border-[rgba(163,64,84,0.30)] hover:border-[#ED9E58] hover:bg-[rgba(27,25,49,0.90)]'
                 }`}
               >
                 <input
@@ -197,22 +202,22 @@ export default function ExecutiveDashboardPage() {
                   className="hidden"
                 />
 
-                <div className="w-16 h-16 rounded-full bg-[#7c3aed]/20 border border-[#7c3aed]/40 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[#7c3aed]/30 transition-all">
+                <div className="w-16 h-16 rounded-2xl bg-[rgba(237,158,88,0.15)] border border-[rgba(237,158,88,0.35)] flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-[rgba(237,158,88,0.25)] transition-all">
                   {uploading ? (
-                    <Loader2 className="animate-spin text-[#7c3aed]" size={32} />
+                    <Loader2 className="animate-spin text-[#ED9E58]" size={32} />
                   ) : (
-                    <Upload className="text-[#7c3aed]" size={32} />
+                    <Upload className="text-[#ED9E58]" size={32} />
                   )}
                 </div>
 
-                <h3 className="font-['Space_Grotesk'] text-xl font-bold text-white mb-2">
+                <h3 className="font-['Plus_Jakarta_Sans'] text-xl font-bold text-white mb-2">
                   {uploading ? 'Ingesting SBOM & Parallel Threat Intelligence...' : 'Upload CycloneDX / SPDX SBOM'}
                 </h3>
-                <p className="text-sm text-[#8a809b] max-w-md mb-4">
+                <p className="text-sm text-[#A34054] max-w-md mb-4">
                   Drag and drop your SBOM JSON file here, or click to browse. ThreatMesh will parse components and query NVD, OSV.dev & GitHub Advisories in parallel.
                 </p>
 
-                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[#1a1a2e] text-[#a78bfa] rounded-full text-xs font-mono border border-[#7c3aed]/30">
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-[rgba(237,158,88,0.12)] text-[#ED9E58] rounded-full text-xs font-mono border border-[rgba(237,158,88,0.30)] font-bold">
                   <Shield size={12} /> Supports CycloneDX 1.4/1.5 & SPDX 2.2/2.3 JSON
                 </span>
               </div>
@@ -227,7 +232,7 @@ export default function ExecutiveDashboardPage() {
           </motion.div>
         ) : (
           /* =========================================================================
-             STATE 2: ACTIVE WATCH DASHBOARD
+             STATE 2: ACTIVE EXECUTIVE WATCH DASHBOARD (hac333k Redesign)
              ========================================================================= */
           <motion.div
             key="active-dashboard"
@@ -235,15 +240,22 @@ export default function ExecutiveDashboardPage() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.4 }}
-            className="space-y-6"
+            className="space-y-8"
           >
             {/* Dashboard Sub-Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#151526]/80 border border-[#1E1E3A] p-4 rounded-xl backdrop-blur-xl">
-              <div>
-                <h1 className="text-2xl font-extrabold tracking-tight text-white flex items-center gap-2 font-['Space_Grotesk']">
-                  <Eye className="text-[#7C3AED]" size={24} /> MODULE 1 — WATCH Executive Monitor
-                </h1>
-                <p className="text-xs text-[#ccc3d8] mt-0.5">Real-time autonomous defense status for scan: <span className="font-mono text-[#7C3AED] font-bold">{activeScanId}</span></p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 glass-card p-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[rgba(237,158,88,0.15)] border border-[rgba(237,158,88,0.35)] flex items-center justify-center">
+                  <Eye className="text-[#ED9E58]" size={22} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-extrabold tracking-tight text-white font-['Plus_Jakarta_Sans'] flex items-center gap-2">
+                    MODULE 1 — Executive WATCH Monitor
+                  </h1>
+                  <p className="text-xs text-[#A34054] mt-0.5 font-medium">
+                    Autonomous defense active for scan ID: <span className="font-mono text-[#ED9E58] font-bold">{activeScanId}</span>
+                  </p>
+                </div>
               </div>
 
               <div className="flex items-center gap-3">
@@ -252,14 +264,14 @@ export default function ExecutiveDashboardPage() {
                     localStorage.removeItem('active_scan_id');
                     setActiveScanId(null);
                   }}
-                  className="px-3.5 py-1.5 bg-[#1b1b21] hover:bg-[#2a2930] text-[#ccc3d8] hover:text-white text-xs font-mono font-bold rounded-lg border border-[#4a4455]/50 transition-colors"
+                  className="btn-ghost-brand text-xs !py-2 !px-4"
                 >
                   Clear Active Scan
                 </button>
 
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="px-4 py-1.5 bg-[#7C3AED] hover:bg-[#6d28d9] text-white text-xs font-mono font-bold rounded-lg shadow-lg transition-colors flex items-center gap-1.5"
+                  className="btn-primary-brand text-xs !py-2 !px-4 gap-1.5"
                 >
                   <Upload size={14} /> New SBOM
                 </button>
@@ -298,6 +310,8 @@ export default function ExecutiveDashboardPage() {
               </div>
             </div>
 
+            <SectionDivider variant="glow" />
+
             {/* Feature 3: ADTG Dependency Trust Graph & 5-Signal Inspector */}
             <div className="w-full">
               <ADTGTrustGraph packages={packages} />
@@ -307,6 +321,8 @@ export default function ExecutiveDashboardPage() {
             <div className="w-full">
               <InteractiveDependencyGraph scanId={activeScanId} packages={packages} />
             </div>
+
+            <SectionDivider variant="double" />
 
             {/* Feature 6: Attack Replay Timeline */}
             <div className="w-full">

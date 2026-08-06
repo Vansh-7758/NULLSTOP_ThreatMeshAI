@@ -2,7 +2,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, ShieldAlert, FileCode2, Lock, Flame, Bot, AlertTriangle } from 'lucide-react';
+import { FileCode2, Lock, Flame, Bot, AlertTriangle } from 'lucide-react';
 
 interface PolicyStatusGridProps {
   blockedCount?: number;
@@ -20,10 +20,10 @@ export default function PolicyStatusGrid({ blockedCount = 0 }: PolicyStatusGridP
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <h4 className="text-xs font-bold uppercase tracking-wider text-[#E6EDF3]">
+        <h4 className="text-xs font-bold uppercase tracking-wider text-white font-['Plus_Jakarta_Sans']">
           Active Guardrail Policies (5)
         </h4>
-        <span className="text-[10px] text-[#00C896] bg-[#00C896]/10 px-2 py-0.5 rounded-full border border-[#00C896]/30 font-mono">
+        <span className="text-[10px] text-[#22c55e] bg-[rgba(34,197,94,0.15)] px-2.5 py-0.5 rounded-full border border-[rgba(34,197,94,0.30)] font-mono font-bold">
           All Enforced
         </span>
       </div>
@@ -37,28 +37,28 @@ export default function PolicyStatusGrid({ blockedCount = 0 }: PolicyStatusGridP
           return (
             <div
               key={p.id}
-              className="bg-[#161B22] border border-[#30363D] rounded-xl p-3 flex flex-col justify-between space-y-2 shadow-sm hover:border-[#00C896]/50 transition-colors"
+              className="glass-card p-3.5 flex flex-col justify-between space-y-2 rounded-xl"
             >
               <div className="flex items-start justify-between">
-                <div className={`p-1.5 rounded-lg ${isCritical ? 'bg-[#E84040]/10 text-[#E84040]' : isHigh ? 'bg-[#F0A500]/10 text-[#F0A500]' : 'bg-[#F0A500]/7 text-[#F0A500]/70'}`}>
+                <div className={`p-1.5 rounded-lg ${isCritical ? 'bg-[rgba(239,68,68,0.20)] text-[#ef4444]' : isHigh ? 'bg-[rgba(245,158,11,0.20)] text-[#f59e0b]' : 'bg-[rgba(237,158,88,0.20)] text-[#ED9E58]'}`}>
                   <Icon size={16} />
                 </div>
-                <span className="text-[9px] font-mono text-[#00C896] bg-[#00C896]/10 px-1.5 py-0.5 rounded border border-[#00C896]/20 font-bold">
+                <span className="text-[9px] font-mono text-[#22c55e] bg-[rgba(34,197,94,0.15)] px-1.5 py-0.5 rounded border border-[rgba(34,197,94,0.30)] font-bold">
                   ACTIVE
                 </span>
               </div>
 
               <div>
-                <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-mono text-[#8B949E] font-bold">{p.id}</span>
-                  <span className="text-xs font-bold text-[#E6EDF3] truncate">{p.name}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono text-[#ED9E58] font-bold">{p.id}</span>
+                  <span className="text-xs font-bold text-white truncate font-['Plus_Jakarta_Sans']">{p.name}</span>
                 </div>
-                <p className="text-[10px] text-[#8B949E] leading-tight line-clamp-2 mt-1">{p.desc}</p>
+                <p className="text-[10px] text-[#CBD5E1] leading-tight line-clamp-2 mt-1 font-sans">{p.desc}</p>
               </div>
 
-              <div className="pt-2 border-t border-[#30363D]/60 flex items-center justify-between text-[10px]">
-                <span className="text-[#8B949E]">Risk Level</span>
-                <span className={`font-mono font-bold ${isCritical ? 'text-[#E84040]' : isHigh ? 'text-[#F0A500]' : 'text-[#F0A500]/70'}`}>
+              <div className="pt-2 border-t border-[rgba(233,188,185,0.15)] flex items-center justify-between text-[10px]">
+                <span className="text-[#CBD5E1] font-medium">Risk Level</span>
+                <span className={`font-mono font-bold ${isCritical ? 'text-[#ef4444]' : isHigh ? 'text-[#f59e0b]' : 'text-[#ED9E58]'}`}>
                   {p.risk}
                 </span>
               </div>

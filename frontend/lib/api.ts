@@ -102,7 +102,7 @@ export const getHuntPlaybooks = (scanId: string) =>
 export const askCopilot = (scanId: string, question: string) =>
   fetchAPI<{ answer: string }>(`/api/hunt/${scanId}/ask`, {
     method: 'POST',
-    body: JSON.stringify({ question })
+    body: JSON.stringify({ question, scan_id: scanId })
   });
 
 // ── DEFEND Module API Functions ──

@@ -1,9 +1,15 @@
 // frontend/app/layout.tsx
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
 import DitherBackground from "@/components/ui/DitherBackground";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-plus-jakarta",
+});
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,14 +25,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-[#09090F] text-[#E4E1EA] min-h-screen flex flex-col relative`}>
+      <body className={`${plusJakartaSans.className} ${inter.className} bg-[#1B1931] text-[#E9BCB9] min-h-screen flex flex-col relative selection:bg-[#ED9E58]/30 selection:text-white`}>
         {/* Dynamic Dither Canvas WebGL Background Layer (Client-side rendered) */}
-        <div className="fixed inset-0 z-0 pointer-events-auto opacity-40">
+        <div className="fixed inset-0 z-0 pointer-events-auto opacity-30">
           <DitherBackground
-            waveColor={[0.49, 0.23, 0.93]}
-            waveSpeed={0.04}
-            waveFrequency={2.5}
-            waveAmplitude={0.25}
+            waveColor={[0.64, 0.25, 0.33]}
+            waveSpeed={0.03}
+            waveFrequency={2.2}
+            waveAmplitude={0.20}
             colorNum={4}
             pixelSize={2}
             enableMouseInteraction={true}

@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: threatmesh-backend
+    env: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_REPO_OWNER
+        value: Anshul-052
+      - key: GITHUB_REPO_NAME
+        value: OrchestrateAi

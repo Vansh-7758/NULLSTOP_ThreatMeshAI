@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Playbook } from '@/types';
 import { getPlaybooks, generatePR } from '@/lib/api';
-import { Brain, ChevronDown, ChevronUp, ShieldCheck, AlertCircle, Sparkles, BookOpen, Users, CheckCircle2, GitPullRequest, Loader2, Shield, Lock, FileCheck, Scale, AlertTriangle, Layers } from 'lucide-react';
+import { Brain, ChevronDown, ChevronUp, Users, CheckCircle2, GitPullRequest, Loader2, Shield } from 'lucide-react';
 
 interface PlaybookSectionProps {
   scanId?: string;
@@ -48,7 +48,6 @@ export default function PlaybookSection({
     }
   }, [scanId, initialPlaybooks]);
 
-  // Demo fallback playbooks from 8-agent council
   const displayPlaybooks = React.useMemo(() => {
     if (playbooks && playbooks.length > 0) return playbooks;
     if (scanId !== 'default') return [];
@@ -60,7 +59,7 @@ export default function PlaybookSection({
         package_name: 'log4j-core',
         threat_summary: 'Remote Code Execution (RCE) in Apache Log4j Core via JNDI lookup (CVE-2021-44228). An unauthenticated attacker can send crafted HTTP requests containing JNDI lookup strings to execute arbitrary code with root process privileges.',
         business_impact: 'Critical Blast Radius: Payment API, Auth Service, and Core Logging Microservices affected. Potential full server takeover and unencrypted PII database exfiltration.',
-        trust_explanation: 'Package scores 10.0 out of 100. CVE Severity subtracted 40 points (Critical RCE). EPSS signal subtracted 24.25 points (97% active exploitation probability). Public exploit signal subtracted 20 points (Metasploit exploit module available). Maintainer activity subtracted 5.75 points.',
+        trust_explanation: 'Package scores 10.0 out of 100. CVE Severity subtracted 40 points (Critical RCE). EPSS signal subtracted 24.25 points (97% active exploitation probability). Public exploit signal subtracted 20 points.',
         recommended_action: 'Upgrade log4j-core from version 2.14.1 to version 2.17.1. Patch Agent confirmed zero breaking changes and full compatibility with current dependency tree.',
         compliance_details: {
           'NIST CSF 2.0': {
@@ -72,7 +71,7 @@ export default function PlaybookSection({
           'MITRE ATT&CK': {
             code: 'T1195.001 & T1190',
             title: 'Supply Chain Compromise — Compromise of Software Dependencies & Public Exploitation',
-            description: 'Technique T1195.001 covers malicious modification or vulnerable dependency injection in upstream open-source packages. Technique T1190 targets direct exploit execution against exposed web applications.',
+            description: 'Technique T1195.001 covers malicious modification or vulnerable dependency injection in upstream open-source packages.',
             audit_mandate: 'ATTACK VECTOR MAPPED: Attackers probe JNDI headers to achieve Remote Code Execution. Upgrading dependency removes the entry vector.'
           },
           'OWASP Top 10': {
@@ -108,7 +107,7 @@ export default function PlaybookSection({
         package_name: 'ua-parser-js',
         threat_summary: 'NPM Account Takeover Supply Chain Backdoor (CVE-2021-42013). Malicious actor compromised maintainer account and published trojanized version 0.7.29 containing password stealer and Monero cryptocurrency miner.',
         business_impact: 'High Severity: Node.js web frontend and API gateway components affected. Potential credential theft from environment variables.',
-        trust_explanation: 'Package scores 25.0 out of 100. Malicious backdoor indicator subtracted 40 points. EPSS subtracted 20 points. Public exploit active.',
+        trust_explanation: 'Package scores 25.0 out of 100. Malicious backdoor indicator subtracted 40 points. EPSS subtracted 20 points.',
         recommended_action: 'Upgrade ua-parser-js from version 0.7.28 to version 0.7.33 (Clean verified release).',
         compliance_details: {
           'NIST CSF 2.0': {
@@ -183,49 +182,55 @@ export default function PlaybookSection({
       initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-[#0e0e14]/90 border border-[#2D2D5E] rounded-xl p-6 shadow-2xl backdrop-blur-xl space-y-6"
+      className="glass-card p-6 lg:p-8 space-y-6 relative overflow-hidden"
     >
+      {/* Top accent line */}
+      <div
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ background: 'linear-gradient(90deg, transparent, #22c55e, #ED9E58, transparent)' }}
+      />
+
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E1E3A] pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[rgba(163,64,84,0.15)] pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[rgba(237,158,88,0.12)] text-[#ED9E58] border border-[rgba(237,158,88,0.30)]">
               FEATURE 5 & FEATURE 8
             </span>
-            <h2 className="font-['Space_Grotesk'] text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Brain className="text-[#00c896]" size={20} /> Multi-Agent AI Council & Regulatory Compliance
+            <h2 className="font-['Plus_Jakarta_Sans'] text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <Brain className="text-[#22c55e]" size={20} /> MULTI-AGENT AI COUNCIL & REGULATORY COMPLIANCE
             </h2>
           </div>
-          <p className="text-xs text-[#ccc3d8] mt-1">
+          <p className="text-xs text-[#A34054]">
             8 specialized AI agents analyze at-risk packages simultaneously from 8 distinct domain perspectives to synthesize consensus playbooks, compliance mappings, and automated PR fixes.
           </p>
         </div>
 
-        <span className="text-xs text-[#00c896] font-mono font-bold bg-[#00c896]/10 px-3 py-1 rounded-full border border-[#00c896]/30 flex items-center gap-1.5 shrink-0">
+        <span className="text-xs text-[#22c55e] font-mono font-bold bg-[rgba(34,197,94,0.12)] px-3.5 py-1.5 rounded-full border border-[rgba(34,197,94,0.30)] flex items-center gap-1.5 shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.15)]">
           <Users size={14} /> 8 Agents Converged
         </span>
       </div>
 
       {/* 8 Agent Cards Grid */}
-      <div className="bg-[#141424] p-4 rounded-xl border border-[#232345] space-y-2.5">
-        <span className="text-[#a78bfa] font-mono font-bold text-xs uppercase tracking-wider block">
+      <div className="bg-[rgba(27,25,49,0.90)] p-4 rounded-xl border border-[rgba(163,64,84,0.20)] space-y-2.5">
+        <span className="text-[#ED9E58] font-mono font-bold text-xs uppercase tracking-wider block font-['Plus_Jakarta_Sans']">
           8 Specialized AI Agents Convened:
         </span>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 font-mono text-xs">
           {agentList.map((agent) => (
-            <div key={agent.name} className="bg-[#0c0c16] p-2.5 rounded-lg border border-[#1f1f3a] flex items-center justify-between gap-2">
+            <div key={agent.name} className="bg-[rgba(11,13,27,0.70)] p-2.5 rounded-xl border border-[rgba(163,64,84,0.15)] flex items-center justify-between gap-2">
               <div>
                 <span className="text-white font-bold text-[11px] block">{agent.name}</span>
-                <span className="text-[#8a809b] text-[9px] block truncate">{agent.role}</span>
+                <span className="text-[#A34054] text-[9px] block truncate">{agent.role}</span>
               </div>
-              <CheckCircle2 size={15} className="text-[#00c896] shrink-0" />
+              <CheckCircle2 size={15} className="text-[#22c55e] shrink-0" />
             </div>
           ))}
         </div>
       </div>
 
       {/* Playbooks List */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {displayPlaybooks.map((pb) => {
           const isExpanded = expandedId === pb.id || expandedId === null;
           const confidence = pb.confidence_score ? Math.round(pb.confidence_score) : 98;
@@ -269,32 +274,32 @@ export default function PlaybookSection({
           return (
             <div
               key={pb.id}
-              className="bg-[#141424]/90 border border-[#232345] rounded-xl overflow-hidden shadow-md"
+              className="glass-card rounded-2xl overflow-hidden group"
             >
               {/* Header Bar */}
               <div
                 onClick={() => toggleExpand(pb.id)}
-                className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#1a1a32] transition-colors select-none"
+                className="p-5 flex items-center justify-between cursor-pointer hover:bg-[rgba(237,158,88,0.04)] transition-colors select-none"
               >
                 <div className="flex items-center gap-3">
-                  <span className="px-2.5 py-1 rounded text-xs font-mono font-extrabold bg-[#ff2a6d]/20 text-[#ff2a6d] border border-[#ff2a6d]/50">
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[rgba(239,68,68,0.15)] text-[#ef4444] border border-[rgba(239,68,68,0.30)]">
                     {pb.package_name}
                   </span>
                   <div>
-                    <h4 className="text-sm font-bold text-white font-['Space_Grotesk']">
+                    <h4 className="text-base font-bold text-white font-['Plus_Jakarta_Sans'] group-hover:text-[#ED9E58] transition-colors">
                       {pb.package_name} Remediation Playbook
                     </h4>
-                    <p className="text-xs text-[#ccc3d8] line-clamp-1 mt-0.5">
+                    <p className="text-xs text-[#E9BCB9]/80 line-clamp-1 mt-0.5">
                       {pb.threat_summary}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-[#00c896] bg-[#00c896]/10 px-2.5 py-0.5 rounded border border-[#00c896]/30 font-mono font-bold">
+                  <span className="text-xs text-[#22c55e] bg-[rgba(34,197,94,0.12)] px-3 py-1 rounded-full border border-[rgba(34,197,94,0.30)] font-mono font-bold">
                     {confidence}% Confidence
                   </span>
-                  {isExpanded ? <ChevronUp size={18} className="text-[#8a809b]" /> : <ChevronDown size={18} className="text-[#8a809b]" />}
+                  {isExpanded ? <ChevronUp size={18} className="text-[#A34054]" /> : <ChevronDown size={18} className="text-[#A34054]" />}
                 </div>
               </div>
 
@@ -306,39 +311,39 @@ export default function PlaybookSection({
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    className="border-t border-[#232345] p-5 space-y-5 text-xs bg-[#0c0c16]/90"
+                    className="border-t border-[rgba(163,64,84,0.15)] p-6 space-y-6 text-xs bg-[rgba(11,13,27,0.80)]"
                   >
                     {/* 1. Threat Summary */}
                     <div>
-                      <span className="text-[11px] font-mono font-bold text-[#ff2a6d] uppercase tracking-wider block mb-1">
+                      <span className="text-[11px] font-mono font-bold text-[#ef4444] uppercase tracking-wider block mb-1">
                         1. Threat Characterization (Threat Agent)
                       </span>
-                      <p className="text-[#ccc3d8] leading-relaxed font-sans">{pb.threat_summary}</p>
+                      <p className="text-[#E9BCB9] leading-relaxed font-sans">{pb.threat_summary}</p>
                     </div>
 
                     {/* 2. Business Impact */}
                     <div>
-                      <span className="text-[11px] font-mono font-bold text-[#ff9900] uppercase tracking-wider block mb-1">
+                      <span className="text-[11px] font-mono font-bold text-[#f59e0b] uppercase tracking-wider block mb-1">
                         2. Business Impact & Blast Radius (Risk Agent)
                       </span>
-                      <p className="text-[#ccc3d8] leading-relaxed font-sans">{pb.business_impact}</p>
+                      <p className="text-[#E9BCB9] leading-relaxed font-sans">{pb.business_impact}</p>
                     </div>
 
                     {/* 3. Trust Explanation */}
                     <div>
-                      <span className="text-[11px] font-mono font-bold text-[#a78bfa] uppercase tracking-wider block mb-1">
+                      <span className="text-[11px] font-mono font-bold text-[#9A5FFD] uppercase tracking-wider block mb-1">
                         3. ADTG Trust Score Signal Breakdown (Trust Agent)
                       </span>
-                      <p className="text-[#ccc3d8] leading-relaxed font-sans">{pb.trust_explanation}</p>
+                      <p className="text-[#E9BCB9] leading-relaxed font-sans">{pb.trust_explanation}</p>
                     </div>
 
                     {/* 4. Recommended Action & Automated PR Generator */}
                     <div>
-                      <span className="text-[11px] font-mono font-bold text-[#00c896] uppercase tracking-wider block mb-1">
+                      <span className="text-[11px] font-mono font-bold text-[#22c55e] uppercase tracking-wider block mb-1">
                         4. Verified Safe Patch & GitHub PR Generator (Patch Agent)
                       </span>
-                      <div className="p-3.5 bg-[#141424] border border-[#00c896]/50 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                        <div className="font-mono text-[#00c896] text-xs font-bold">
+                      <div className="p-4 bg-[rgba(27,25,49,0.90)] border border-[rgba(34,197,94,0.40)] rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="font-mono text-[#22c55e] text-xs font-bold">
                           {pb.recommended_action}
                         </div>
 
@@ -347,7 +352,7 @@ export default function PlaybookSection({
                             href={prUrl}
                             target="_blank"
                             rel="noreferrer"
-                            className="px-3.5 py-1.5 bg-[#00c896] hover:bg-[#00b084] text-[#0c0c16] text-xs font-mono font-bold rounded-md shadow transition-colors flex items-center gap-1.5 shrink-0"
+                            className="px-4 py-2 bg-[#22c55e] hover:bg-[#16a34a] text-[#1B1931] text-xs font-mono font-bold rounded-xl shadow transition-colors flex items-center gap-1.5 shrink-0"
                           >
                             <GitPullRequest size={14} /> Open GitHub Pull Request ↗
                           </a>
@@ -355,7 +360,7 @@ export default function PlaybookSection({
                           <button
                             disabled={isPrLoading}
                             onClick={(e) => handleFixPR(e, pb.package_name)}
-                            className="px-3.5 py-1.5 bg-[#7c3aed] hover:bg-[#6d28d9] text-white text-xs font-mono font-bold rounded-md shadow transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                            className="btn-primary-brand text-xs !py-2 !px-4 gap-1.5 disabled:opacity-50 shrink-0"
                           >
                             {isPrLoading ? (
                               <>
@@ -369,16 +374,16 @@ export default function PlaybookSection({
                           </button>
                         )}
                       </div>
-                      {prError && <p className="text-[10px] text-[#ff2a6d] mt-1 font-mono">{prError}</p>}
+                      {prError && <p className="text-[10px] text-[#ef4444] mt-1 font-mono">{prError}</p>}
                     </div>
 
-                    {/* 5. Detailed Regulatory & Compliance Standard Mapping */}
+                    {/* 5. Framework Mappings */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-mono font-bold text-[#7c3aed] uppercase tracking-wider block">
+                        <span className="text-[11px] font-mono font-bold text-[#ED9E58] uppercase tracking-wider block font-['Plus_Jakarta_Sans']">
                           5. Regulatory & Security Framework Mappings (Compliance Agent)
                         </span>
-                        <span className="text-[10px] font-mono text-[#a78bfa] bg-[#7c3aed]/20 px-2 py-0.5 rounded border border-[#7c3aed]/40">
+                        <span className="text-[10px] font-mono text-[#ED9E58] bg-[rgba(237,158,88,0.12)] px-2.5 py-0.5 rounded-full border border-[rgba(237,158,88,0.30)] font-bold">
                           5 Security Frameworks Audited
                         </span>
                       </div>
@@ -390,53 +395,39 @@ export default function PlaybookSection({
                           return (
                             <div
                               key={stdName}
-                              className="bg-[#141424] border border-[#232345] hover:border-[#7c3aed]/50 p-3.5 rounded-xl space-y-2 flex flex-col justify-between"
+                              className="bg-[rgba(27,25,49,0.75)] border border-[rgba(163,64,84,0.20)] hover:border-[rgba(237,158,88,0.40)] p-4 rounded-xl space-y-2 flex flex-col justify-between"
                             >
                               <div>
                                 <div className="flex items-center justify-between gap-2 mb-1.5">
                                   <div className="flex items-center gap-1.5">
-                                    <Shield size={14} className="text-[#00c896]" />
-                                    <span className="font-bold text-white font-['Space_Grotesk'] text-xs">
+                                    <Shield size={14} className="text-[#22c55e]" />
+                                    <span className="font-bold text-white font-['Plus_Jakarta_Sans'] text-xs">
                                       {stdName}
                                     </span>
                                   </div>
-                                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-[#00c896]/15 text-[#00c896] border border-[#00c896]/30">
+                                  <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[rgba(34,197,94,0.15)] text-[#22c55e] border border-[rgba(34,197,94,0.30)]">
                                     {info.code}
                                   </span>
                                 </div>
 
-                                <h5 className="text-[11px] font-bold text-[#a78bfa] mb-1 font-mono">
+                                <h5 className="text-[11px] font-bold text-[#ED9E58] mb-1 font-mono">
                                   {info.title}
                                 </h5>
 
-                                <p className="text-[11px] text-[#ccc3d8] leading-relaxed font-sans">
+                                <p className="text-[11px] text-[#E9BCB9]/80 leading-relaxed font-sans">
                                   {info.description}
                                 </p>
                               </div>
 
-                              <div className="pt-2 border-t border-[#1f1f3a] text-[10px] font-mono text-[#8a809b]">
-                                <strong className="text-[#ff9900] block mb-0.5">Audit Mandate:</strong>
-                                <span className="text-[#ccc3d8]">{info.audit_mandate}</span>
+                              <div className="pt-2 border-t border-[rgba(163,64,84,0.15)] text-[10px] font-mono text-[#A34054]">
+                                <strong className="text-[#ED9E58] block mb-0.5">Audit Mandate:</strong>
+                                <span className="text-[#E9BCB9]/90">{info.audit_mandate}</span>
                               </div>
                             </div>
                           );
                         })}
                       </div>
                     </div>
-
-                    {/* 6. Evidence Citations */}
-                    {pb.evidence_citations && pb.evidence_citations.length > 0 && (
-                      <div>
-                        <span className="text-[11px] font-mono font-bold text-[#8a809b] uppercase tracking-wider block mb-1">
-                          6. Evidence Citations & Data Sources (Consensus Engine)
-                        </span>
-                        <ul className="list-disc list-inside space-y-0.5 text-[#ccc3d8] font-mono text-[11px]">
-                          {pb.evidence_citations.map((cite: string, i: number) => (
-                            <li key={i}>{cite}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

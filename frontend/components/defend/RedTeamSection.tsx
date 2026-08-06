@@ -12,29 +12,11 @@ import {
 import {
   RedTeamServiceReport,
   RedTeamTestResultDetail,
-  RedTeamRunHistoryItem,
-  AIProductConfig
+  RedTeamRunHistoryItem
 } from '@/types';
 import AIProductConfigModal from './AIProductConfigModal';
 import RedTeamHistoryChart from './RedTeamHistoryChart';
-import {
-  Flame,
-  Play,
-  Loader2,
-  ShieldCheck,
-  AlertTriangle,
-  Info,
-  Server,
-  Settings,
-  ChevronDown,
-  ChevronUp,
-  CheckCircle2,
-  XCircle,
-  ExternalLink,
-  Award,
-  Lock,
-  FileCheck
-} from 'lucide-react';
+import { Flame, Play, Loader2, ShieldCheck, AlertTriangle, Info, Server, Settings, ChevronDown, ChevronUp, CheckCircle2, XCircle, Award, Lock, FileCheck } from 'lucide-react';
 
 interface RedTeamSectionProps {
   scanId: string;
@@ -107,7 +89,7 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
       } catch (e) {
         console.warn("Polling red team status error:", e);
       }
-    }, 1500); // 1.5 second polling interval
+    }, 1500);
   };
 
   const handleStartRedTeam = async () => {
@@ -143,21 +125,23 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
   return (
     <div className="space-y-6">
       {/* Target Endpoint & Mode Control Banner */}
-      <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-5 space-y-4 shadow-sm">
+      <div className="glass-card p-6 space-y-4 relative overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-[2px]" style={{ background: 'linear-gradient(90deg, transparent, #ef4444, #ED9E58, transparent)' }} />
+        
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             {/* Circular Resilience Score Meter */}
-            <div className="relative w-24 h-24 flex items-center justify-center flex-shrink-0">
+            <div className="relative w-24 h-24 flex items-center justify-center shrink-0">
               <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
                 <path
-                  className="text-[#30363D]"
+                  className="text-[rgba(255,255,255,0.06)]"
                   strokeWidth="3.5"
                   stroke="currentColor"
                   fill="none"
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
-                  className={overallSafetyScore >= 80 ? 'text-[#00C896]' : overallSafetyScore >= 50 ? 'text-[#F0A500]' : 'text-[#E84040]'}
+                  className={overallSafetyScore >= 80 ? 'text-[#22c55e]' : overallSafetyScore >= 50 ? 'text-[#f59e0b]' : 'text-[#ef4444]'}
                   strokeDasharray={`${overallSafetyScore}, 100`}
                   strokeWidth="3.5"
                   strokeLinecap="round"
@@ -167,28 +151,27 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
                 />
               </svg>
               <div className="absolute text-center">
-                <span className="text-xl font-black text-[#E6EDF3] block leading-none">{overallSafetyScore.toFixed(0)}%</span>
-                <span className="text-[9px] uppercase font-bold text-[#8B949E] block mt-0.5">Resilience</span>
+                <span className="text-xl font-extrabold text-white block leading-none font-mono">{overallSafetyScore.toFixed(0)}%</span>
+                <span className="text-[9px] uppercase font-bold text-[#A34054] block mt-0.5 font-['Plus_Jakarta_Sans']">Resilience</span>
               </div>
             </div>
 
             <div>
-              <h3 className="text-base font-extrabold text-[#E6EDF3] flex items-center gap-2">
-                <Flame size={18} className="text-[#E84040]" /> Autonomous AI Red Team as a Service
+              <h3 className="text-base font-extrabold text-white flex items-center gap-2 font-['Plus_Jakarta_Sans']">
+                <Flame size={18} className="text-[#ef4444]" /> AUTONOMOUS AI RED TEAM AS A SERVICE
               </h3>
-              <p className="text-xs text-[#8B949E] mt-1 max-w-xl leading-relaxed">
+              <p className="text-xs text-[#A34054] mt-1 max-w-xl leading-relaxed">
                 Actively probe live AI endpoints across 8 adversarial attack vectors mapped directly to EU AI Act Article 15 robustness requirements and ISO 42001 clauses.
               </p>
 
-              {/* Target Status Indicator */}
               <div className="mt-2 flex items-center gap-2">
-                <span className="text-[10px] font-bold text-[#8B949E] uppercase font-mono">Target Mode:</span>
+                <span className="text-[10px] font-bold text-[#A34054] uppercase font-mono">Target Mode:</span>
                 {isExternalConfigured ? (
-                  <span className="text-[10px] font-mono font-bold text-[#00C896] px-2 py-0.5 bg-[#00C896]/10 border border-[#00C896]/30 rounded flex items-center gap-1">
+                  <span className="text-[10px] font-mono font-bold text-[#22c55e] px-2.5 py-0.5 bg-[rgba(34,197,94,0.12)] border border-[rgba(34,197,94,0.30)] rounded-full flex items-center gap-1">
                     <Server size={11} /> External Endpoint: {profile?.ai_product_endpoint}
                   </span>
                 ) : (
-                  <span className="text-[10px] font-mono font-bold text-[#F0A500] px-2 py-0.5 bg-[#F0A500]/10 border border-[#F0A500]/30 rounded">
+                  <span className="text-[10px] font-mono font-bold text-[#ED9E58] px-2.5 py-0.5 bg-[rgba(237,158,88,0.12)] border border-[rgba(237,158,88,0.30)] rounded-full">
                     Internal Demo Mode (ThreatMesh AI Council)
                   </span>
                 )}
@@ -199,96 +182,75 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
           <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
             <button
               onClick={() => setIsConfigModalOpen(true)}
-              className="px-4 py-3 bg-[#21262D] hover:bg-[#30363D] text-[#E6EDF3] font-bold text-xs rounded-xl transition-all flex items-center gap-2 border border-[#30363D]"
+              className="btn-ghost-brand text-xs !py-3 !px-4 gap-2"
             >
               <Settings size={15} />
-              {isExternalConfigured ? 'Edit AI Endpoint Settings' : 'Configure AI Endpoint'}
+              {isExternalConfigured ? 'Edit Settings' : 'Configure Endpoint'}
             </button>
 
             <button
               onClick={handleStartRedTeam}
               disabled={isTesting}
-              className="px-6 py-3 bg-[#E84040] hover:bg-[#c93232] text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 hover:scale-105"
+              className="btn-primary-brand text-xs !py-3 !px-6 gap-2 disabled:opacity-50"
             >
-              {isTesting ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} fill="white" />}
-              {isTesting ? 'Executing 32 Adversarial Probes...' : isExternalConfigured ? 'Run Red Team on Your Product' : 'Run Red Team (Internal Demo)'}
+              {isTesting ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} className="fill-current" />}
+              {isTesting ? 'Executing 32 Probes...' : 'Run Red Team Attack'}
             </button>
           </div>
         </div>
-
-        {/* Demo Mode Notice Banner (If external endpoint not configured) */}
-        {!isExternalConfigured && (
-          <div className="p-3 bg-[#F0A500]/10 border border-[#F0A500]/30 rounded-lg flex items-center justify-between text-xs text-[#F0A500]">
-            <div className="flex items-center gap-2">
-              <Info size={15} className="shrink-0" />
-              <span>
-                <strong>Demo Mode Active:</strong> Currently testing ThreatMesh's internal AI agents. Add your company's AI product endpoint in settings to test your own live product.
-              </span>
-            </div>
-            <button
-              onClick={() => setIsConfigModalOpen(true)}
-              className="font-bold underline text-xs shrink-0 hover:text-white"
-            >
-              Add Endpoint →
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* Progress Bar while testing */}
+      {/* Progress Bar */}
       {isTesting && (
-        <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-4 space-y-2">
+        <div className="glass-card p-4 space-y-2">
           <div className="flex justify-between text-xs font-mono">
-            <span className="text-[#00C896] font-bold flex items-center gap-2">
+            <span className="text-[#22c55e] font-bold flex items-center gap-2">
               <Loader2 size={14} className="animate-spin" /> Executing Adversarial Probes Against Target...
             </span>
-            <span className="text-[#8B949E]">{completedCount} of {totalCount} Tests Complete</span>
+            <span className="text-[#A34054]">{completedCount} of {totalCount} Tests Complete</span>
           </div>
-          <div className="w-full bg-[#0D1117] h-2 rounded-full overflow-hidden border border-[#30363D]">
+          <div className="w-full bg-[rgba(27,25,49,0.90)] h-2 rounded-full overflow-hidden border border-[rgba(163,64,84,0.20)]">
             <div
-              className="bg-[#00C896] h-full transition-all duration-500 ease-out"
+              className="bg-[#22c55e] h-full transition-all duration-500 ease-out"
               style={{ width: `${(completedCount / totalCount) * 100}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* FIXED MANDATORY SAFETY BANNER */}
-      <div className="p-3 bg-[#0D1117] border border-[#30363D] rounded-xl flex items-center gap-3 text-xs text-[#8B949E] shadow-sm">
-        <Lock size={16} className="text-[#00C896] shrink-0" />
+      {/* MANDATORY SAFETY BANNER */}
+      <div className="p-3.5 bg-[rgba(11,13,27,0.70)] border border-[rgba(163,64,84,0.15)] rounded-xl flex items-center gap-3 text-xs text-[#A34054]">
+        <Lock size={16} className="text-[#22c55e] shrink-0" />
         <span>
           <strong>ThreatMesh AI Safety Protocol:</strong> Adversarial test prompts are transmitted exclusively to endpoints explicitly authorized by your team. No data is extracted beyond model responses, no authentication is bypassed, and no destructive testing is performed.
         </span>
       </div>
 
       {/* REGULATORY COMPLIANCE BADGE STRIP */}
-      <div className="bg-[#161B22] border border-[#30363D] rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div className="glass-card p-4 flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-2">
-          <Award size={18} className="text-[#7C3AED]" />
-          <span className="text-xs font-bold text-[#E6EDF3] uppercase tracking-wider">
+          <Award size={18} className="text-[#9A5FFD]" />
+          <span className="text-xs font-bold text-white uppercase tracking-wider font-['Plus_Jakarta_Sans']">
             Regulatory Standard Attestation Mappings:
           </span>
         </div>
         <div className="flex flex-wrap gap-2 text-[10px] font-mono">
-          <span className="px-2.5 py-1 bg-[#7C3AED]/15 text-[#7C3AED] border border-[#7C3AED]/30 rounded font-bold">
+          <span className="px-2.5 py-1 bg-[rgba(154,95,253,0.15)] text-[#9A5FFD] border border-[rgba(154,95,253,0.30)] rounded-full font-bold">
             EU AI Act Article 15(1) Robustness
           </span>
-          <span className="px-2.5 py-1 bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 rounded font-bold">
+          <span className="px-2.5 py-1 bg-[rgba(237,158,88,0.15)] text-[#ED9E58] border border-[rgba(237,158,88,0.30)] rounded-full font-bold">
             EU AI Act Article 15(4) Input Integrity
           </span>
-          <span className="px-2.5 py-1 bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30 rounded font-bold">
+          <span className="px-2.5 py-1 bg-[rgba(34,197,94,0.15)] text-[#22c55e] border border-[rgba(34,197,94,0.30)] rounded-full font-bold">
             ISO/IEC 42001 Clause 8.3 Operation
-          </span>
-          <span className="px-2.5 py-1 bg-[#F0A500]/15 text-[#F0A500] border border-[#F0A500]/30 rounded font-bold">
-            ISO/IEC 42001 Clause 8.4 Safety
           </span>
         </div>
       </div>
 
       {/* 8 ATTACK VECTOR CARDS GRID */}
       <div className="space-y-4">
-        <h4 className="text-xs font-bold text-[#E6EDF3] uppercase tracking-wider flex items-center gap-2">
-          <ShieldCheck size={16} className="text-[#00C896]" /> 8 Adversarial Attack Vector Findings
+        <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2 font-['Plus_Jakarta_Sans']">
+          <ShieldCheck size={16} className="text-[#22c55e]" /> 8 Adversarial Attack Vector Findings
         </h4>
 
         <div className="grid grid-cols-1 gap-4">
@@ -305,25 +267,25 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
             const isExpanded = expandedVector === v_id;
 
             return (
-              <div key={v_id} className="bg-[#161B22] border border-[#30363D] rounded-xl overflow-hidden shadow-sm">
+              <div key={v_id} className="glass-card rounded-2xl overflow-hidden">
                 <div
                   onClick={() => setExpandedVector(isExpanded ? null : v_id)}
-                  className="p-4 flex items-center justify-between cursor-pointer hover:bg-[#21262D] transition-colors"
+                  className="p-5 flex items-center justify-between cursor-pointer hover:bg-[rgba(237,158,88,0.04)] transition-colors select-none"
                 >
                   <div className="flex items-center gap-3">
                     {isPass ? (
-                      <CheckCircle2 size={20} className="text-[#00C896]" />
+                      <CheckCircle2 size={20} className="text-[#22c55e]" />
                     ) : isWarn ? (
-                      <AlertTriangle size={20} className="text-[#F0A500]" />
+                      <AlertTriangle size={20} className="text-[#f59e0b]" />
                     ) : (
-                      <XCircle size={20} className="text-[#E84040]" />
+                      <XCircle size={20} className="text-[#ef4444]" />
                     )}
                     <div>
-                      <h5 className="text-sm font-bold text-[#E6EDF3] flex items-center gap-2">
+                      <h5 className="text-sm font-bold text-white font-['Plus_Jakarta_Sans']">
                         {title}
                       </h5>
-                      <div className="flex items-center gap-3 mt-1 text-[10px] font-mono text-[#8B949E]">
-                        <span className="text-[#00C896] font-bold">{mapping.eu_ai_act_article}</span>
+                      <div className="flex items-center gap-3 mt-1 text-[10px] font-mono text-[#A34054]">
+                        <span className="text-[#22c55e] font-bold">{mapping.eu_ai_act_article}</span>
                         <span>•</span>
                         <span>{mapping.iso_42001_clause}</span>
                         <span>•</span>
@@ -334,54 +296,42 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
 
                   <div className="flex items-center gap-4">
                     <span
-                      className={`text-sm font-extrabold font-mono px-3 py-1 rounded border ${
+                      className={`text-sm font-extrabold font-mono px-3 py-1 rounded-full border ${
                         isPass
-                          ? 'bg-[#00C896]/15 text-[#00C896] border-[#00C896]/30'
+                          ? 'bg-[rgba(34,197,94,0.15)] text-[#22c55e] border-[rgba(34,197,94,0.30)]'
                           : isWarn
-                          ? 'bg-[#F0A500]/15 text-[#F0A500] border-[#F0A500]/30'
-                          : 'bg-[#E84040]/15 text-[#E84040] border-[#E84040]/30'
+                          ? 'bg-[rgba(245,158,11,0.15)] text-[#f59e0b] border-[rgba(245,158,11,0.30)]'
+                          : 'bg-[rgba(239,68,68,0.15)] text-[#ef4444] border-[rgba(239,68,68,0.30)]'
                       }`}
                     >
                       {score.toFixed(0)}% Score
                     </span>
-                    {isExpanded ? <ChevronUp size={16} className="text-[#8B949E]" /> : <ChevronDown size={16} className="text-[#8B949E]" />}
+                    {isExpanded ? <ChevronUp size={16} className="text-[#A34054]" /> : <ChevronDown size={16} className="text-[#A34054]" />}
                   </div>
                 </div>
 
-                {/* Expanded Probes Evidence Panel */}
                 {isExpanded && (
-                  <div className="p-4 bg-[#0D1117] border-t border-[#30363D] space-y-3">
-                    <p className="text-xs text-[#8B949E] leading-relaxed">
-                      <strong>EU AI Act Alignment:</strong> {mapping.eu_ai_act_description}
-                    </p>
-
+                  <div className="p-5 bg-[rgba(11,13,27,0.80)] border-t border-[rgba(163,64,84,0.15)] space-y-3">
                     <div className="space-y-2">
                       {detailsList.map((dt, idx) => (
                         <div
                           key={dt.id || idx}
                           onClick={() => setSelectedResult(dt)}
-                          className="p-3 bg-[#161B22] border border-[#30363D] rounded-lg cursor-pointer hover:border-[#7C3AED]/50 transition-all space-y-1.5"
+                          className="p-3.5 bg-[rgba(27,25,49,0.75)] border border-[rgba(163,64,84,0.20)] rounded-xl cursor-pointer hover:border-[#ED9E58] transition-all space-y-1.5"
                         >
                           <div className="flex items-center justify-between text-xs font-mono">
-                            <span className="font-bold text-[#E6EDF3]">Probe #{idx + 1}</span>
-                            <span className={`font-extrabold uppercase ${dt.verdict === 'pass' ? 'text-[#00C896]' : 'text-[#E84040]'}`}>
+                            <span className="font-bold text-white">Probe #{idx + 1}</span>
+                            <span className={`font-extrabold uppercase ${dt.verdict === 'pass' ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>
                               [{dt.verdict}] - {dt.score}%
                             </span>
                           </div>
 
-                          <p className="text-xs text-[#8B949E] truncate">
+                          <p className="text-xs text-[#E9BCB9]/80 truncate">
                             <strong>Prompt:</strong> "{dt.prompt}"
                           </p>
-                          <p className="text-xs text-[#8B949E] truncate">
+                          <p className="text-xs text-[#E9BCB9]/80 truncate">
                             <strong>Target Response:</strong> "{dt.response}"
                           </p>
-
-                          <div className="text-[11px] text-[#00C896] font-mono pt-1 flex items-center justify-between">
-                            <span>LLM Judge Reasoning: {dt.reasoning}</span>
-                            <span className="text-[#7C3AED] hover:underline flex items-center gap-1">
-                              Inspect Evidence →
-                            </span>
-                          </div>
                         </div>
                       ))}
                     </div>
@@ -393,65 +343,14 @@ export default function RedTeamSection({ scanId }: RedTeamSectionProps) {
         </div>
       </div>
 
-      {/* HISTORICAL SAFETY TREND CHART */}
       <RedTeamHistoryChart history={history} />
 
-      {/* MODAL: CONFIG SETTINGS */}
       <AIProductConfigModal
         scanId={scanId}
         isOpen={isConfigModalOpen}
         onClose={() => setIsConfigModalOpen(false)}
         onConfigSaved={loadData}
       />
-
-      {/* MODAL: PROBE EVIDENCE INSPECTOR */}
-      {selectedResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-          <div className="bg-[#161B22] border border-[#30363D] rounded-2xl w-full max-w-2xl shadow-2xl p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-[#30363D] pb-3">
-              <h3 className="text-sm font-bold text-[#E6EDF3] font-mono uppercase flex items-center gap-2">
-                <FileCheck size={18} className="text-[#00C896]" /> Adversarial Probe Inspection & Evidence Log
-              </h3>
-              <button onClick={() => setSelectedResult(null)} className="text-[#8B949E] hover:text-[#E6EDF3]">
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-3 text-xs">
-              <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D] space-y-1">
-                <span className="text-[#8B949E] font-bold block uppercase font-mono">Adversarial Test Prompt Sent:</span>
-                <p className="text-[#E6EDF3] font-mono leading-relaxed">{selectedResult.prompt}</p>
-              </div>
-
-              <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D] space-y-1">
-                <span className="text-[#8B949E] font-bold block uppercase font-mono">Target System Response:</span>
-                <p className="text-[#E6EDF3] font-mono leading-relaxed">{selectedResult.response}</p>
-              </div>
-
-              <div className="bg-[#0D1117] p-3 rounded-lg border border-[#30363D] space-y-1">
-                <span className="text-[#00C896] font-bold block uppercase font-mono">LLM-as-a-Judge Evaluation Verdict:</span>
-                <p className="text-[#E6EDF3] leading-relaxed">{selectedResult.reasoning}</p>
-              </div>
-
-              {selectedResult.remediation && (
-                <div className="bg-[#7C3AED]/10 border border-[#7C3AED]/30 p-3 rounded-lg space-y-1">
-                  <span className="text-[#7C3AED] font-bold block uppercase font-mono">Actionable System Hardening Recommendation:</span>
-                  <p className="text-[#E6EDF3] leading-relaxed">{selectedResult.remediation}</p>
-                </div>
-              )}
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <button
-                onClick={() => setSelectedResult(null)}
-                className="px-4 py-2 bg-[#21262D] hover:bg-[#30363D] text-[#E6EDF3] text-xs font-bold rounded-xl"
-              >
-                Close Inspector
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

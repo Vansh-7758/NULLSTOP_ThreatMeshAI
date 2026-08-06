@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { PredictedRisk } from '@/types';
 import { getPredictions } from '@/lib/api';
-import { TrendingUp, AlertTriangle, Sparkles, ShieldAlert, Cpu, Activity, ArrowRight, Zap, CheckCircle2 } from 'lucide-react';
+import { TrendingUp, Sparkles, Zap } from 'lucide-react';
 
 interface PredictedRiskPanelProps {
   scanId?: string;
@@ -43,7 +43,6 @@ export default function PredictedRiskPanel({
     }
   }, [scanId, initialPredictions]);
 
-  // Demo fallback predictions if no backend predictions return for default scan
   const displayPredictions = React.useMemo(() => {
     if (predictions && predictions.length > 0) return predictions;
     if (scanId !== 'default') return [];
@@ -61,7 +60,7 @@ export default function PredictedRiskPanel({
           dependency_chain_risk: 15,
           download_volume_anomaly: 'High Spikes (+340%)'
         },
-        explanation: 'This package has not been updated in 14 months. Its maintainer GitHub account has shown zero activity since early 2025. Three similar packages in PyPI received Critical CVEs in the last 30 days. We recommend monitoring this package closely and preparing a contingency upgrade path.'
+        explanation: 'This package has not been updated in 14 months. Maintainer GitHub account has shown zero activity since early 2025. Three similar packages in PyPI received Critical CVEs in the last 30 days. We recommend monitoring closely.'
       },
       {
         package_name: 'crossenv',
@@ -113,66 +112,68 @@ export default function PredictedRiskPanel({
       initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="bg-[#0e0e14]/90 border border-[#2D2D5E] rounded-xl p-6 shadow-2xl backdrop-blur-xl space-y-6"
+      className="glass-card p-6 lg:p-8 space-y-6 relative overflow-hidden"
     >
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E1E3A] pb-4">
+      <div
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ background: 'linear-gradient(90deg, transparent, #ED9E58, #9A5FFD, transparent)' }}
+      />
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[rgba(233,188,185,0.20)] pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-[#7c3aed]/20 text-[#a78bfa] border border-[#7c3aed]/40">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-[rgba(237,158,88,0.15)] text-[#ED9E58] border border-[rgba(237,158,88,0.35)]">
               FEATURE 9
             </span>
-            <h2 className="font-['Space_Grotesk'] text-lg font-bold text-white tracking-tight flex items-center gap-2">
-              <Sparkles className="text-[#ff9900]" size={20} /> Predictive Risk Engine — Next 30 Days
+            <h2 className="font-['Plus_Jakarta_Sans'] text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <Sparkles className="text-[#ED9E58]" size={20} /> PREDICTIVE RISK ENGINE — NEXT 30 DAYS
             </h2>
           </div>
-          <p className="text-xs text-[#ccc3d8] mt-1">
+          <p className="text-xs text-[#CBD5E1] font-sans">
             Predicts which packages are likely to become vulnerable in the next 30 days BEFORE official CVE publication.
           </p>
         </div>
 
-        <span className="text-xs text-[#ff9900] font-mono font-bold bg-[#ff9900]/10 px-3 py-1 rounded-full border border-[#ff9900]/30 flex items-center gap-1.5 shrink-0">
+        <span className="text-xs text-[#ED9E58] font-mono font-bold bg-[rgba(237,158,88,0.15)] px-3.5 py-1.5 rounded-full border border-[rgba(237,158,88,0.35)] flex items-center gap-1.5 shrink-0 shadow-[0_0_20px_rgba(237,158,88,0.20)]">
           <TrendingUp size={14} /> 30-Day Early Warning AI
         </span>
       </div>
 
-      {/* 5 Predictive Signals Bar */}
-      <div className="bg-[#141424] p-3.5 rounded-xl border border-[#232345] font-mono text-xs text-[#ccc3d8] space-y-2">
-        <span className="text-[#a78bfa] font-bold text-[11px] uppercase tracking-wider block">
+      <div className="bg-[rgba(27,25,49,0.92)] p-4 rounded-xl border border-[rgba(233,188,185,0.25)] font-mono text-xs text-white space-y-3">
+        <span className="text-[#ED9E58] font-extrabold text-[11px] uppercase tracking-wider block font-['Plus_Jakarta_Sans']">
           5 Predictive Signals Evaluated Continuously:
         </span>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-[11px]">
-          <div className="bg-[#0c0c16] p-2 rounded border border-[#1f1f3a]">
-            <span className="text-white font-bold block">1. Maintainer Inactivity</span>
-            <span className="text-[#8a809b] text-[10px]">&gt;365d: +30 pts penalty</span>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5 text-[11px]">
+          <div className="bg-[rgba(11,13,27,0.80)] p-2.5 rounded-lg border border-[rgba(233,188,185,0.20)]">
+            <span className="text-white font-bold block mb-0.5">1. Maintainer Inactivity</span>
+            <span className="text-[#ED9E58] text-[10px] font-mono">&gt;365d: +30 pts penalty</span>
           </div>
-          <div className="bg-[#0c0c16] p-2 rounded border border-[#1f1f3a]">
-            <span className="text-white font-bold block">2. Ecosystem CVE Spike</span>
-            <span className="text-[#8a809b] text-[10px]">npm/PyPI trend shift</span>
+          <div className="bg-[rgba(11,13,27,0.80)] p-2.5 rounded-lg border border-[rgba(233,188,185,0.20)]">
+            <span className="text-white font-bold block mb-0.5">2. Ecosystem CVE Spike</span>
+            <span className="text-[#ED9E58] text-[10px] font-mono">npm/PyPI trend shift</span>
           </div>
-          <div className="bg-[#0c0c16] p-2 rounded border border-[#1f1f3a]">
-            <span className="text-white font-bold block">3. EPSS Risk Trend</span>
-            <span className="text-[#8a809b] text-[10px]">Rising EPSS &gt;0.50</span>
+          <div className="bg-[rgba(11,13,27,0.80)] p-2.5 rounded-lg border border-[rgba(233,188,185,0.20)]">
+            <span className="text-white font-bold block mb-0.5">3. EPSS Risk Trend</span>
+            <span className="text-[#ED9E58] text-[10px] font-mono">Rising EPSS &gt;0.50</span>
           </div>
-          <div className="bg-[#0c0c16] p-2 rounded border border-[#1f1f3a]">
-            <span className="text-white font-bold block">4. Dependency Chain</span>
-            <span className="text-[#8a809b] text-[10px]">Lateral chain risk</span>
+          <div className="bg-[rgba(11,13,27,0.80)] p-2.5 rounded-lg border border-[rgba(233,188,185,0.20)]">
+            <span className="text-white font-bold block mb-0.5">4. Dependency Chain</span>
+            <span className="text-[#ED9E58] text-[10px] font-mono">Lateral chain risk</span>
           </div>
-          <div className="bg-[#0c0c16] p-2 rounded border border-[#1f1f3a]">
-            <span className="text-white font-bold block">5. Download Anomaly</span>
-            <span className="text-[#8a809b] text-[10px]">Attacker study spikes</span>
+          <div className="bg-[rgba(11,13,27,0.80)] p-2.5 rounded-lg border border-[rgba(233,188,185,0.20)]">
+            <span className="text-white font-bold block mb-0.5">5. Download Anomaly</span>
+            <span className="text-[#ED9E58] text-[10px] font-mono">Attacker study spikes</span>
           </div>
         </div>
       </div>
 
-      {/* Predictions Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {displayPredictions.map((pred, idx) => {
           const riskScore = pred.risk_score ?? 0;
           const isHighRisk = riskScore >= 70;
           const badgeBg = isHighRisk
-            ? 'bg-[#ff2a6d]/20 text-[#ff2a6d] border-[#ff2a6d]/50'
-            : 'bg-[#ff9900]/20 text-[#ff9900] border-[#ff9900]/50';
+            ? 'bg-[rgba(239,68,68,0.20)] text-[#ef4444] border-[rgba(239,68,68,0.40)]'
+            : 'bg-[rgba(237,158,88,0.20)] text-[#ED9E58] border-[rgba(237,158,88,0.40)]';
 
           const signalList = [];
           if (pred.signals) {
@@ -186,32 +187,28 @@ export default function PredictedRiskPanel({
           return (
             <motion.div
               key={pred.package_name + idx}
-              whileHover={shouldReduceMotion ? {} : { y: -2 }}
-              className="bg-[#141424]/90 border border-[#232345] hover:border-[#7c3aed]/60 p-4 rounded-xl shadow-md space-y-3 flex flex-col justify-between"
+              whileHover={shouldReduceMotion ? {} : { y: -3 }}
+              className="glass-card p-5 rounded-xl space-y-3 flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2">
-                  <div>
-                    <h4 className="text-sm font-bold text-white font-['Space_Grotesk']">
-                      {pred.package_name} <span className="text-xs font-mono text-[#8a809b]">@{pred.version}</span>
-                    </h4>
-                  </div>
-                  <div className={`px-2.5 py-1 rounded-lg border text-xs font-mono font-extrabold ${badgeBg} flex items-center gap-1`}>
+                  <h4 className="text-base font-extrabold text-white font-['Plus_Jakarta_Sans'] group-hover:text-[#ED9E58] transition-colors">
+                    {pred.package_name} <span className="text-xs font-mono text-[#ED9E58]">@{pred.version}</span>
+                  </h4>
+                  <div className={`px-3 py-1 rounded-lg border text-xs font-mono font-extrabold ${badgeBg} flex items-center gap-1.5`}>
                     <TrendingUp size={13} /> {Math.round(riskScore)} Risk Index
                   </div>
                 </div>
 
-                {/* Signal Badges */}
                 <div className="flex flex-wrap gap-1.5 my-2">
                   {signalList.map((tag) => (
-                    <span key={tag} className="text-[10px] font-mono font-semibold bg-[#0c0c16] text-[#a78bfa] border border-[#7c3aed]/30 px-2 py-0.5 rounded">
+                    <span key={tag} className="text-[10px] font-mono font-bold bg-[rgba(154,95,253,0.18)] text-[#9A5FFD] border border-[rgba(154,95,253,0.35)] px-2.5 py-0.5 rounded-full">
                       {tag}
                     </span>
                   ))}
                 </div>
 
-                {/* Plain English Explanation */}
-                <p className="text-xs text-[#ccc3d8] leading-relaxed font-sans mt-2">
+                <p className="text-xs text-[#CBD5E1] leading-relaxed font-sans mt-2">
                   {pred.explanation}
                 </p>
               </div>
@@ -220,12 +217,11 @@ export default function PredictedRiskPanel({
         })}
       </div>
 
-      {/* XZ Utils Value Prop Callout */}
-      <div className="p-4 bg-[#7c3aed]/10 border border-[#7c3aed]/30 rounded-xl text-xs leading-relaxed text-[#ccc3d8] space-y-1">
-        <span className="font-bold text-[#a78bfa] block text-sm flex items-center gap-1.5">
-          <Zap size={16} className="text-[#ff9900]" /> Why Predictive Risk Engine Matters (The XZ Utils Lesson):
+      <div className="p-4 bg-[rgba(237,158,88,0.12)] border border-[rgba(237,158,88,0.30)] rounded-xl text-xs leading-relaxed text-[#F8FAFC] space-y-1">
+        <span className="font-extrabold text-[#ED9E58] block text-sm flex items-center gap-1.5 font-['Plus_Jakarta_Sans']">
+          <Zap size={16} className="text-[#ED9E58]" /> Why Predictive Risk Engine Matters (The XZ Utils Lesson):
         </span>
-        <p className="text-xs text-[#ccc3d8]">
+        <p className="text-xs text-[#CBD5E1] leading-relaxed font-sans">
           The XZ Utils backdoor — one of the most devastating supply chain attacks in history — showed clear behavioral signals months before the actual attack was discovered. ThreatMesh Predictive Risk Engine analyzes maintainer inactivity, repository anomalies, and ecosystem trends to flag vulnerabilities weeks before official CVE publication.
         </p>
       </div>

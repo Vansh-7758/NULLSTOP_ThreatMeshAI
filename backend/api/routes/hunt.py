@@ -432,7 +432,7 @@ Provide a direct, informative response formatted in markdown. Include specific p
             except Exception as e:
                 logger.warning(f"Copilot Anthropic API call failed: {e}")
 
-        return CopilotResponse(answer=answer)
+        return CopilotResponse(answer=answer, scan_id=scan_id)
 
     except Exception as e:
         logger.error(f"Error in ask_copilot for scan {scan_id}: {e}", exc_info=True)

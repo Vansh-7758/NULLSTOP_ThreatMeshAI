@@ -62,12 +62,26 @@ async def generate_pr_endpoint(scan_id: str, package_name: str, request: Request
             new_version=new_version
         )
 
+        # Update package trust score to 95.0 (Remediated / Fixed)
+        try:
+            await postgres.update_package_trust_score(scan_id, package_name, old_version, 95.0)
+        except Exception as e:
+            logger.warning(f"Could not update trust score in database: {e}")
+
         await manager.send_live_event(
             event_type="pr_generated",
             title=f"Pull Request Created: {package_name}",
             description=f"Generated PR to upgrade {package_name} from {old_version} to {new_version}",
             severity="info",
             data={"package_name": package_name, "pr_url": pr_res.pr_url}
+        )
+
+        await manager.send_live_event(
+            event_type="trust_update",
+            title=f"Trust Score Upgraded: {package_name}",
+            description=f"{package_name} trust score upgraded to 95.0/100 after automated patch.",
+            severity="info",
+            data={"package_name": package_name, "old_score": 10.0, "new_score": 95.0}
         )
 
         return pr_res

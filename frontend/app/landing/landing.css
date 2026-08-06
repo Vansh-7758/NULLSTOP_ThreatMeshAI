@@ -1,0 +1,399 @@
+/* ═══════════════════════════════════════════════════════════════
+   ThreatMesh AI — Landing Page Scoped Styles
+   Ported from hac333k Vite app (Tailwind v4 @theme → CSS vars)
+   All styles scoped under .landing-page to prevent dashboard bleed
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── Custom Properties (from @theme) ──────────────────────── */
+.landing-page {
+  --color-bg:           #1B1931;
+  --color-bg-2:         #44174E;
+  --color-bg-3:         #662249;
+  --color-accent-rose:  #A34054;
+  --color-accent-amber: #ED9E58;
+  --color-accent-blush: #E9BCB9;
+  --color-text-primary: #E9BCB9;
+  --color-text-muted:   #A34054;
+  --color-text-faint:   rgba(163,64,84,0.65);
+
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  --spacing-section:    120px;
+  --spacing-section-sm: 80px;
+  --spacing-card-pad:   32px;
+
+  --radius-card: 24px;
+  --radius-btn:  20px;
+
+  --shadow-brand:      0 0 40px rgba(237,158,88,0.20), 0 0 80px rgba(102,34,73,0.25);
+  --shadow-brand-sm:   0 0 20px rgba(237,158,88,0.25);
+  --shadow-card:       0 4px 32px rgba(27,25,49,0.6), inset 0 1px 0 rgba(233,188,185,0.06);
+  --shadow-card-hover: 0 8px 48px rgba(27,25,49,0.8), 0 0 32px rgba(237,158,88,0.15);
+  --shadow-glow:       0 0 60px rgba(237,158,88,0.35);
+}
+
+/* ─── Animations ─────────────────────────────────────────────── */
+@keyframes landingFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+@keyframes landingMarquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes landingBlobDrift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(30px, -20px) scale(1.04); }
+  100% { transform: translate(-20px, 30px) scale(0.97); }
+}
+@keyframes landingFloatY {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
+}
+@keyframes landingPulseRing {
+  0%   { transform: scale(1);   opacity: 1; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+@keyframes landingShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes landingScanLine {
+  0%   { top: 0%;   opacity: 0; }
+  10%  { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+@keyframes landingBorderRotate {
+  0%   { background-position: 0%   50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0%   50%; }
+}
+@keyframes landingGlowPulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.05); }
+}
+@keyframes landingPulseBrand {
+  0%, 100% { box-shadow: 0 0 20px rgba(237,158,88,0.3); }
+  50%       { box-shadow: 0 0 50px rgba(237,158,88,0.6); }
+}
+
+/* ─── Scoped Body Styles ─────────────────────────────────────── */
+.landing-page {
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  background-color: #1B1931;
+  color: #E9BCB9;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ─── Global Grid Overlay ────────────────────────────────────── */
+.landing-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(163,64,84,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(163,64,84,0.06) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Noise texture */
+.landing-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.40;
+}
+
+/* ─── Ambient Background Blobs ───────────────────────────────── */
+.landing-page .blob-1, .landing-page .blob-2, .landing-page .blob-3 {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(140px);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+.landing-page .blob-1 {
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(68,23,78,0.55) 0%, rgba(102,34,73,0.20) 50%, transparent 70%);
+  top: -200px; left: -150px;
+  animation: landingBlobDrift 16s ease-in-out infinite alternate;
+}
+.landing-page .blob-2 {
+  width: 550px; height: 550px;
+  background: radial-gradient(circle, rgba(102,34,73,0.40) 0%, rgba(163,64,84,0.12) 50%, transparent 70%);
+  top: 5%; right: -100px;
+  animation: landingBlobDrift 20s ease-in-out infinite alternate-reverse;
+  animation-delay: -5s;
+}
+.landing-page .blob-3 {
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(237,158,88,0.08) 0%, rgba(163,64,84,0.06) 50%, transparent 70%);
+  bottom: -250px; left: 20%;
+  animation: landingBlobDrift 24s ease-in-out infinite alternate;
+  animation-delay: -10s;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+.landing-page ::-webkit-scrollbar { width: 5px; }
+.landing-page ::-webkit-scrollbar-track { background: #1B1931; }
+.landing-page ::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ED9E58, #A34054);
+  border-radius: 3px;
+}
+.landing-page ::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #E9BCB9, #ED9E58); }
+
+/* ─── Selection ──────────────────────────────────────────────── */
+.landing-page ::selection { background: rgba(237,158,88,0.30); color: #1B1931; }
+
+/* ─── Glass Card ─────────────────────────────────────────────── */
+.landing-page .glass {
+  background: rgba(27,25,49,0.75);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid rgba(163,64,84,0.20);
+  border-radius: 24px;
+}
+.landing-page .glass-light {
+  background: rgba(233,188,185,0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(233,188,185,0.10);
+  border-radius: 24px;
+}
+
+/* ─── Gradient Text Utilities ────────────────────────────────── */
+.landing-page .gradient-text {
+  background: linear-gradient(135deg, #ED9E58 0%, #E9BCB9 60%, #ED9E58 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.landing-page .gradient-text-light {
+  background: linear-gradient(135deg, #E9BCB9 0%, #ED9E58 50%, #E9BCB9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Button System ──────────────────────────────────────────── */
+.landing-page .btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  border: none;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ED9E58 0%, #A34054 100%);
+  color: #1B1931;
+  box-shadow: 0 0 32px rgba(237,158,88,0.30), 0 4px 16px rgba(27,25,49,0.5);
+}
+.landing-page .btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(233,188,185,0.18) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.landing-page .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 48px rgba(237,158,88,0.45), 0 8px 24px rgba(27,25,49,0.6); }
+.landing-page .btn-primary:hover::before { opacity: 1; }
+
+.landing-page .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 28px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  background: transparent;
+  color: #E9BCB9;
+  border: 1px solid rgba(233,188,185,0.22);
+}
+.landing-page .btn-ghost:hover {
+  border-color: rgba(237,158,88,0.55);
+  color: #ED9E58;
+  background: rgba(237,158,88,0.06);
+  box-shadow: 0 0 24px rgba(237,158,88,0.12);
+}
+
+/* ─── Badge System ───────────────────────────────────────────── */
+.landing-page .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.landing-page .badge-brand {
+  background: rgba(237,158,88,0.12);
+  color: #ED9E58;
+  border: 1px solid rgba(237,158,88,0.28);
+}
+
+/* ─── Gradient Border Card ───────────────────────────────────── */
+.landing-page .gradient-border {
+  position: relative;
+  border-radius: 25px;
+}
+.landing-page .gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 25px;
+  background: linear-gradient(135deg, rgba(237,158,88,0.55), rgba(163,64,84,0.20), rgba(237,158,88,0.45));
+  background-size: 200% 200%;
+  animation: landingBorderRotate 4s ease infinite;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.landing-page .gradient-border:hover::before { opacity: 1; }
+
+/* ─── Marquee ────────────────────────────────────────────────── */
+.landing-page .marquee-track {
+  display: flex;
+  width: max-content;
+  animation: landingMarquee 32s linear infinite;
+}
+.landing-page .marquee-track:hover { animation-play-state: paused; }
+
+/* ─── Float animations ───────────────────────────────────────── */
+.landing-page .float  { animation: landingFloatY 6s ease-in-out infinite; }
+.landing-page .float2 { animation: landingFloatY 8s ease-in-out infinite; animation-delay: -2.5s; }
+.landing-page .float3 { animation: landingFloatY 5s ease-in-out infinite; animation-delay: -4s; }
+
+/* ─── Scan Line ──────────────────────────────────────────────── */
+.landing-page .scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(237,158,88,0.6) 30%,
+    rgba(233,188,185,0.5) 50%,
+    rgba(237,158,88,0.6) 70%,
+    transparent 100%);
+  animation: landingScanLine 3.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ─── Pulse Dot ──────────────────────────────────────────────── */
+.landing-page .pulse-dot {
+  position: relative;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #ED9E58;
+}
+.landing-page .pulse-dot::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: rgba(237,158,88,0.3);
+  animation: landingPulseRing 2s ease-out infinite;
+}
+
+/* ─── Shimmer text ───────────────────────────────────────────── */
+.landing-page .shimmer {
+  background: linear-gradient(90deg,
+    rgba(233,188,185,0.0) 0%,
+    rgba(233,188,185,0.10) 50%,
+    rgba(233,188,185,0.0) 100%);
+  background-size: 200% 100%;
+  animation: landingShimmer 2.5s linear infinite;
+}
+
+/* ─── Animated gradient text shimmer ────────────────────────── */
+.landing-page .text-shimmer {
+  background: linear-gradient(90deg,
+    #A34054 0%,
+    #ED9E58 25%,
+    #E9BCB9 50%,
+    #ED9E58 75%,
+    #A34054 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: landingShimmer 4s linear infinite;
+}
+
+/* ─── Section Container ──────────────────────────────────────── */
+.landing-page .section-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ─── Z helper ───────────────────────────────────────────────── */
+.landing-page .z-content { position: relative; z-index: 1; }
+
+/* ─── Nav link underline ─────────────────────────────────────── */
+.landing-page .nav-link-underline { position: relative; }
+.landing-page .nav-link-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, #ED9E58, #E9BCB9);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: 1px;
+}
+.landing-page .nav-link-underline:hover::after { transform: scaleX(1); }
+
+/* ─── Section glow tops ─────────────────────────────────────── */
+.landing-page .section-glow-top {
+  position: relative;
+}
+.landing-page .section-glow-top::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: -1px;
+  height: 200px;
+  background: linear-gradient(180deg, rgba(95,1,251,0.07) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Glow ring for glass cards ──────────────────────────────── */
+.landing-page .glow-ring {
+  box-shadow: 0 0 0 1px rgba(95,1,251,0.08);
+  transition: box-shadow 0.4s ease;
+}
+.landing-page .glow-ring-hover:hover {
+  box-shadow: 0 0 24px rgba(95,1,251,0.15), 0 0 0 1px rgba(95,1,251,0.20);
+}
+
+/* ─── Transition premium ─────────────────────────────────────── */
+.landing-page .transition-premium {
+  transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}

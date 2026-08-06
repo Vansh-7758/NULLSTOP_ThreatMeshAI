@@ -4,7 +4,7 @@
 import React, { useRef } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Shield, Upload, Eye, Radar, ShieldAlert } from 'lucide-react';
+import { Shield, Upload, Eye, Radar, ShieldAlert, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { uploadSBOM } from '@/lib/api';
 
@@ -12,6 +12,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  if (pathname === '/landing') return null;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -30,47 +32,59 @@ export default function Navbar() {
 
   const navItems = [
     {
+      href: '/landing',
+      label: 'LANDING',
+      icon: Sparkles,
+      activeColor: 'text-[#ED9E58]',
+      badgeColor: 'bg-[#ED9E58]',
+      isMatch: (p: string) => p === '/landing'
+    },
+    {
       href: '/',
       label: 'WATCH',
       icon: Eye,
-      activeColor: 'text-[#7C3AED]',
-      badgeColor: 'bg-[#7C3AED]',
+      activeColor: 'text-[#ED9E58]',
+      badgeColor: 'bg-[#ED9E58]',
       isMatch: (p: string) => p === '/' || p.startsWith('/scan/')
     },
     {
       href: '/hunt',
       label: 'HUNT',
       icon: Radar,
-      activeColor: 'text-[#0053DB]',
-      badgeColor: 'bg-[#0053DB]',
+      activeColor: 'text-[#9A5FFD]',
+      badgeColor: 'bg-[#9A5FFD]',
       isMatch: (p: string) => p.startsWith('/hunt')
     },
     {
       href: '/defend',
       label: 'DEFEND',
       icon: ShieldAlert,
-      activeColor: 'text-[#E84040]',
-      badgeColor: 'bg-[#E84040]',
+      activeColor: 'text-[#ef4444]',
+      badgeColor: 'bg-[#ef4444]',
       isMatch: (p: string) => p.startsWith('/defend') || p.startsWith('/governance') || p.startsWith('/red-team')
     }
   ];
 
   return (
-    <header className="sticky top-0 z-50 px-6 py-3 bg-[#09090F]/80 backdrop-blur-xl border-b border-[#1E1E3A] flex items-center justify-between shadow-2xl">
-      {/* Top Left: Wordmark */}
-      <Link href="/" className="flex items-center gap-2 group">
-        <div className="p-1.5 rounded-lg bg-[#7C3AED]/10 border border-[#7C3AED]/30 group-hover:border-[#7C3AED] transition-all">
-          <Shield className="w-5 h-5 text-[#7C3AED]" />
+    <header className="sticky top-0 z-50 px-6 py-3 bg-[rgba(27,25,49,0.92)] backdrop-blur-2xl border-b border-[rgba(233,188,185,0.25)] flex items-center justify-between shadow-[0_4px_32px_rgba(27,25,49,0.8)]">
+      {/* Top Left: Logo Wordmark */}
+      <Link href="/" className="flex items-center gap-2.5 group">
+        <div className="relative w-9 h-9 flex items-center justify-center">
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#ED9E58] to-[#9A5FFD] shadow-[0_0_20px_rgba(237,158,88,0.5)] group-hover:shadow-[0_0_28px_rgba(237,158,88,0.7)] transition-all duration-300" />
+          <Shield className="relative z-10 w-5 h-5 text-[#1B1931]" strokeWidth={2.5} />
+          <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[#22c55e] animate-pulse" />
         </div>
-        <div className="flex items-baseline">
-          <span className="font-extrabold text-lg tracking-tighter text-white font-['Space_Grotesk']">THREAT</span>
-          <span className="font-extrabold text-lg tracking-tighter text-[#7C3AED] font-['Space_Grotesk']">MESH</span>
-          <span className="text-[9px] font-mono text-[#00C896] ml-1.5 px-1.5 py-0.5 rounded bg-[#00C896]/10 border border-[#00C896]/30 font-bold">AI</span>
+        <div className="flex flex-col leading-none">
+          <div className="flex items-baseline gap-1">
+            <span className="font-extrabold text-base tracking-tight text-white font-['Plus_Jakarta_Sans']">ThreatMesh</span>
+            <span className="font-extrabold text-base tracking-tight text-[#ED9E58] font-['Plus_Jakarta_Sans']">AI</span>
+          </div>
+          <span className="text-[9px] font-bold text-[#ED9E58] tracking-[0.15em] uppercase">Autonomous Platform</span>
         </div>
       </Link>
 
-      {/* Center Navigation Dock (Stitch Glass Dock) */}
-      <nav className="flex items-center glass-panel rounded-full px-5 py-1.5 gap-6 border border-[#1E1E3A] shadow-inner">
+      {/* Center Navigation Dock */}
+      <nav className="flex items-center bg-[rgba(27,25,49,0.95)] rounded-full px-5 py-1.5 gap-2 border border-[rgba(233,188,185,0.30)] shadow-[0_0_24px_rgba(27,25,49,0.9)]">
         {navItems.map((item) => {
           const isActive = item.isMatch(pathname);
           const Icon = item.icon;
@@ -79,16 +93,18 @@ export default function Navbar() {
             <Link
               key={item.href}
               href={item.href}
-              className="relative flex items-center gap-2 px-3 py-1 rounded-full transition-all group"
+              className={`relative flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 group ${
+                isActive ? 'bg-[rgba(237,158,88,0.18)] text-white border border-[rgba(237,158,88,0.40)]' : 'hover:bg-[rgba(255,255,255,0.10)] text-[#E9BCB9]'
+              }`}
             >
-              <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? item.activeColor : 'text-[#8B949E]'}`} />
-              <span className={`font-mono text-xs font-bold tracking-wider ${isActive ? 'text-white' : 'text-[#8B949E] group-hover:text-white'}`}>
+              <Icon className={`w-4 h-4 transition-transform duration-300 group-hover:scale-110 ${isActive ? item.activeColor : 'text-[#ED9E58] group-hover:text-white'}`} />
+              <span className={`font-mono text-xs font-bold tracking-wider ${isActive ? 'text-white font-extrabold' : 'text-[#E9BCB9] group-hover:text-white'}`}>
                 {item.label}
               </span>
               {isActive && (
                 <motion.div
-                  layoutId="stitch-nav-indicator"
-                  className={`absolute -bottom-1 left-2 right-2 h-0.5 rounded-full ${item.badgeColor}`}
+                  layoutId="hac333k-nav-indicator"
+                  className={`absolute -bottom-1 left-3 right-3 h-0.5 rounded-full ${item.badgeColor}`}
                   transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                 />
               )}
@@ -99,18 +115,18 @@ export default function Navbar() {
 
       {/* Top Right: System Status & Upload Button */}
       <div className="flex items-center gap-4">
-        <div className="hidden sm:flex items-center gap-2 px-3 py-1 rounded-full bg-[#141428] border border-[#1E1E3A] text-xs font-mono">
+        <div className="hidden sm:flex items-center gap-2 px-3.5 py-1 rounded-full bg-[rgba(34,197,94,0.15)] border border-[rgba(34,197,94,0.35)] text-xs font-mono">
           <div className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00C896] opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00C896]"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#22c55e]"></span>
           </div>
-          <span className="text-[#8B949E]">SYSTEMS OPERATIONAL</span>
+          <span className="text-[11px] font-bold text-[#22c55e] tracking-wider">SYSTEM OPERATIONAL</span>
         </div>
 
         <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" accept=".json,.xml" />
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="px-4 py-1.5 bg-[#7C3AED] hover:bg-[#6d28d9] text-white text-xs font-bold font-mono rounded-lg shadow-lg shadow-[#7C3AED]/20 border border-[#7C3AED]/50 transition-all flex items-center gap-1.5 hover:scale-105 active:scale-95"
+          className="btn-primary-brand text-xs font-bold tracking-wide flex items-center gap-1.5"
         >
           <Upload size={14} />
           <span>UPLOAD SBOM</span>

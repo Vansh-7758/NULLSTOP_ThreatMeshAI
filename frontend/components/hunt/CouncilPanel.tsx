@@ -1,355 +1,145 @@
 // frontend/components/hunt/CouncilPanel.tsx
 'use client';
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { Package, Playbook, AgentOutput } from '@/types';
-import TrustScoreBadge from '@/components/shared/TrustScoreBadge';
-import {
-  Shield,
-  TrendingDown,
-  Star,
-  Wrench,
-  Scale,
-  Eye,
-  FileCheck,
-  Brain,
-  CheckCircle2,
-  XCircle,
-  Loader2,
-  ChevronDown,
-  ChevronUp,
-  Download,
-  GitPullRequest,
-  Copy,
-  Check,
-  Sparkles,
-  AlertTriangle
-} from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Bot, CheckCircle, Clock, Loader2, Cpu } from 'lucide-react';
 
-interface CouncilPanelProps {
-  package: Package | null;
-  playbook: Playbook | null;
-  scanId: string;
-  agentOutputs?: Record<string, AgentOutput>;
+interface AgentInfo {
+  id: string;
+  name: string;
+  role: string;
+  status: 'pending' | 'running' | 'completed' | 'failed';
+  outputSnippet?: string;
+  accent: string;
 }
 
-const AGENTS = [
-  { id: 'threat_agent', name: 'Threat Agent', role: 'Threat Characterization', icon: Shield },
-  { id: 'risk_agent', name: 'Risk Agent', role: 'Business Impact', icon: TrendingDown },
-  { id: 'trust_agent', name: 'Trust Agent', role: 'Trust Score Explainer', icon: Star },
-  { id: 'patch_agent', name: 'Patch Agent', role: 'Dependency Upgrade', icon: Wrench },
-  { id: 'compliance_agent', name: 'Compliance Agent', role: 'Regulatory Mapping', icon: Scale },
-  { id: 'safety_agent', name: 'Safety Agent', role: 'AI & Data Pipeline Safety', icon: Eye },
-  { id: 'governance_agent', name: 'Governance Agent', role: 'Corporate Security Auditor', icon: FileCheck },
-  { id: 'consensus_node', name: 'Consensus Engine', role: 'Multi-Agent Synthesis', icon: Brain }
-];
+interface CouncilPanelProps {
+  scanId: string | null;
+  currentPackage: string;
+  packagesAnalyzed: number;
+  totalPackages: number;
+  status: 'idle' | 'running' | 'completed' | 'failed';
+}
 
 export default function CouncilPanel({
-  package: pkg,
-  playbook,
   scanId,
-  agentOutputs = {}
+  currentPackage,
+  packagesAnalyzed,
+  totalPackages,
+  status
 }: CouncilPanelProps) {
-  const router = useRouter();
-  const shouldReduceMotion = useReducedMotion();
+  const agents: AgentInfo[] = [
+    { id: 'threat', name: 'Threat Intelligence Agent', role: 'CVE triage & exploit vulnerability mapping', status: status === 'running' ? 'completed' : status === 'completed' ? 'completed' : 'pending', accent: '#ef4444' },
+    { id: 'risk', name: 'Business Risk Agent', role: 'Blast radius & financial impact analysis', status: status === 'running' ? 'completed' : status === 'completed' ? 'completed' : 'pending', accent: '#f59e0b' },
+    { id: 'trust', name: 'Trust Analyst Agent', role: '5-factor AADTG score recalculation', status: status === 'running' ? 'running' : status === 'completed' ? 'completed' : 'pending', accent: '#ED9E58' },
+    { id: 'patch', name: 'Patch Synthesizer Agent', role: 'Non-breaking version bump computation', status: status === 'running' ? 'pending' : status === 'completed' ? 'completed' : 'pending', accent: '#9A5FFD' },
+    { id: 'compliance', name: 'Compliance Mapper Agent', role: 'NIST CSF, MITRE ATT&CK & OWASP mapping', status: status === 'running' ? 'pending' : status === 'completed' ? 'completed' : 'pending', accent: '#3b82f6' },
+    { id: 'safety', name: 'Safety Guard Agent', role: 'Jailbreak & hallucination resistance check', status: status === 'running' ? 'pending' : status === 'completed' ? 'completed' : 'pending', accent: '#22c55e' },
+    { id: 'governance', name: 'Governance Agent', role: 'Policy compliance & event auditing', status: status === 'running' ? 'pending' : status === 'completed' ? 'completed' : 'pending', accent: '#3b82f6' },
+    { id: 'consensus', name: 'AI Council Consensus', role: 'Final playbook synthesis & PR payload build', status: status === 'completed' ? 'completed' : 'pending', accent: '#ec4899' }
+  ];
 
-  const [copiedCmd, setCopiedCmd] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
-    threat: true,
-    action: true,
-    impact: false,
-    trust: false,
-    patch: true,
-    compliance: true,
-    safety: false,
-    governance: false,
-    citations: false
-  });
-
-  if (!pkg) {
-    return (
-      <div className="w-full h-full min-h-[500px] bg-[#161B22] border border-[#30363D] rounded-xl flex flex-col items-center justify-center p-8 text-center">
-        <Brain size={48} className="text-[#8B949E] mb-3 opacity-40" />
-        <h3 className="text-base font-semibold text-[#E6EDF3] mb-1">No Package Selected</h3>
-        <p className="text-xs text-[#8B949E] max-w-xs">
-          Select an at-risk package from the left sidebar to inspect its 8-Agent Council analysis and consensus playbook.
-        </p>
-      </div>
-    );
-  }
-
-  const toggleSection = (key: string) => {
-    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const confidenceScore = playbook?.confidence_score ?? 88.0;
-  const confidenceColor =
-    confidenceScore >= 80 ? '#00C896' : confidenceScore >= 60 ? '#F0A500' : '#E84040';
-
-  const upgradeCmd =
-    (playbook as any)?.patch_recommendation?.upgrade_command ||
-    `npm install ${pkg.name}@latest`;
-
-  const handleCopyCommand = () => {
-    navigator.clipboard.writeText(upgradeCmd);
-    setCopiedCmd(true);
-    setTimeout(() => setCopiedCmd(false), 2000);
-  };
-
-  const handleExportPlaybook = () => {
-    const filename = `threatmesh-playbook-${pkg.name}-${new Date().toISOString().split('T')[0]}.json`;
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(playbook || {}, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', filename);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
+  const progressPct = totalPackages > 0 ? Math.round((packagesAnalyzed / totalPackages) * 100) : 0;
 
   return (
-    <div className="w-full bg-[#161B22] border border-[#30363D] rounded-xl p-6 space-y-6 shadow-sm overflow-hidden">
-      {/* Top Package Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-5 border-b border-[#30363D]">
+    <div className="glass-card p-6 lg:p-8 relative overflow-hidden">
+      <div
+        className="absolute inset-x-0 top-0 h-[2px]"
+        style={{ background: 'linear-gradient(90deg, transparent, #9A5FFD, #ED9E58, transparent)' }}
+      />
+
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[rgba(233,188,185,0.20)] pb-5 mb-6">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h2 className="text-2xl font-bold text-[#E6EDF3]">{pkg.name}</h2>
-            <span className="text-xs font-mono text-[#8B949E]">v{pkg.version}</span>
-            <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-[#0D1117] text-[#00C896] border border-[#00C896]/30 font-bold">
-              {pkg.ecosystem}
-            </span>
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className="w-8 h-8 rounded-xl bg-[rgba(154,95,253,0.18)] border border-[rgba(154,95,253,0.35)] flex items-center justify-center">
+              <Cpu className="text-[#9A5FFD]" size={18} />
+            </div>
+            <h2 className="text-lg font-bold text-white font-['Plus_Jakarta_Sans']">
+              8-AGENT AI COUNCIL SYNTHESIS
+            </h2>
           </div>
-          <p className="text-xs text-[#8B949E] mt-1">Multi-Agent AI Reasoning & Consensus Analysis</p>
+          <p className="text-xs text-[#CBD5E1] font-sans">
+            Multi-agent consensus engine analyzing business blast radius and generating safe remediation playbooks.
+          </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <TrustScoreBadge score={pkg.trust_score} size="lg" />
-          <button
-            onClick={handleExportPlaybook}
-            className="px-3 py-1.5 bg-[#30363D] hover:bg-[#8B949E]/20 text-[#E6EDF3] text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
-          >
-            <Download size={14} /> Export JSON
-          </button>
-        </div>
-      </div>
-
-      {/* 8 Agent Grid (2 Rows of 4 Cards) */}
-      <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-[#8B949E] mb-3 flex items-center gap-1.5">
-          <Brain size={14} className="text-[#00C896]" /> 8-Agent Council Status
-        </h3>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {AGENTS.map((ag) => {
-            const Icon = ag.icon;
-            const outputObj = agentOutputs[ag.id];
-            const isDone = playbook != null || outputObj?.status === 'completed';
-            const isRunning = outputObj?.status === 'running';
-            const isFailed = outputObj?.status === 'failed';
-
-            let statusColor = '#30363D';
-            if (isDone) statusColor = '#00C896';
-            else if (isRunning) statusColor = '#F0A500';
-            else if (isFailed) statusColor = '#E84040';
-
-            return (
-              <div
-                key={ag.id}
-                className="bg-[#0D1117] border rounded-xl p-3 flex flex-col justify-between transition-all"
-                style={{ borderColor: statusColor }}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="p-1.5 rounded-lg bg-[#161B22] text-[#00C896]">
-                        <Icon size={16} />
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-bold text-[#E6EDF3]">{ag.name}</h4>
-                        <span className="text-[10px] text-[#8B949E] block">{ag.role}</span>
-                      </div>
-                    </div>
-
-                    {isDone ? (
-                      <CheckCircle2 size={16} className="text-[#00C896]" />
-                    ) : isRunning ? (
-                      <Loader2 size={16} className="text-[#F0A500] animate-spin" />
-                    ) : isFailed ? (
-                      <XCircle size={16} className="text-[#E84040]" />
-                    ) : (
-                      <div className="w-2.5 h-2.5 rounded-full bg-[#30363D]" />
-                    )}
-                  </div>
-
-                  <p className="text-[11px] text-[#8B949E] leading-snug line-clamp-2 mt-1">
-                    {isDone
-                      ? `Evaluated ${ag.name.replace(' Agent', '')} parameters.`
-                      : isRunning
-                      ? 'Analyzing...'
-                      : 'Pending execution'}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+        <div className="flex items-center gap-4">
+          <div className="text-right">
+            <p className="text-[10px] font-mono font-bold text-[#ED9E58] uppercase tracking-wider">Analysis Progress</p>
+            <p className="text-sm font-mono font-extrabold text-[#ED9E58]">
+              {packagesAnalyzed} / {totalPackages || 8} Packages ({progressPct}%)
+            </p>
+          </div>
+          <div className="w-24 h-2 bg-[rgba(255,255,255,0.08)] rounded-full overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: 'linear-gradient(90deg, #9A5FFD, #ED9E58)' }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.5 }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Consensus Playbook Accordion Section */}
-      {playbook && (
-        <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="border-t border-[#30363D] pt-6 space-y-4"
-        >
-          {/* Header & Confidence Score */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Sparkles size={18} className="text-[#00C896]" />
-              <h3 className="text-base font-bold text-[#E6EDF3]">Consensus Remediation Playbook</h3>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {agents.map((agent, i) => {
+          const isCompleted = agent.status === 'completed';
+          const isRunning = agent.status === 'running';
 
-            <div className="flex items-center gap-2 bg-[#0D1117] border border-[#30363D] px-3 py-1 rounded-full">
-              <span className="text-xs text-[#8B949E]">Council Confidence:</span>
-              <span className="text-xs font-bold" style={{ color: confidenceColor }}>
-                {Math.round(confidenceScore)}%
-              </span>
-            </div>
-          </div>
-
-          {/* 1. Recommended Action (Always Expanded / Prominent) */}
-          <div className="bg-[#0D1117] border border-[#00C896]/40 rounded-xl overflow-hidden">
-            <div
-              onClick={() => toggleSection('action')}
-              className="p-4 flex items-center justify-between cursor-pointer bg-[#00C896]/10 border-b border-[#00C896]/30 select-none"
+          return (
+            <motion.div
+              key={agent.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05, duration: 0.3 }}
+              className={`p-4 rounded-xl transition-all duration-300 relative overflow-hidden ${
+                isRunning
+                  ? 'bg-[rgba(237,158,88,0.15)] border border-[rgba(237,158,88,0.45)] shadow-[0_0_24px_rgba(237,158,88,0.20)]'
+                  : isCompleted
+                  ? 'bg-[rgba(255,255,255,0.03)] border border-[rgba(233,188,185,0.20)] hover:border-[rgba(237,158,88,0.40)]'
+                  : 'bg-[rgba(11,13,27,0.70)] border border-[rgba(233,188,185,0.12)] opacity-70'
+              }`}
             >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#00C896]">
-                Single Recommended Action
-              </span>
-              {expandedSections.action ? <ChevronUp size={16} className="text-[#00C896]" /> : <ChevronDown size={16} className="text-[#00C896]" />}
-            </div>
-            {expandedSections.action && (
-              <div className="p-4 space-y-3">
-                <p className="text-sm font-semibold text-[#E6EDF3] leading-relaxed">
-                  {playbook.recommended_action || `Upgrade ${pkg.name} immediately.`}
-                </p>
-                <div className="pt-2">
-                  <button
-                    onClick={() => router.push(`/scan/${scanId}?package=${pkg.name}`)}
-                    className="px-4 py-2 bg-[#00C896] hover:bg-[#00a87d] text-[#0D1117] font-bold text-xs rounded-lg transition-colors inline-flex items-center gap-2 shadow-md"
-                  >
-                    <GitPullRequest size={15} /> Fix Package in FIX Module
-                  </button>
+              <div className="flex items-center justify-between mb-2">
+                <div
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold font-mono"
+                  style={{ background: `${agent.accent}25`, color: agent.accent, border: `1px solid ${agent.accent}50` }}
+                >
+                  {i + 1}
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* 2. Threat Summary */}
-          <div className="bg-[#0D1117] border border-[#30363D] rounded-xl overflow-hidden">
-            <div
-              onClick={() => toggleSection('threat')}
-              className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#161B22] transition-colors select-none"
-            >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#E84040]">
-                Threat Characterization Summary
-              </span>
-              {expandedSections.threat ? <ChevronUp size={16} className="text-[#8B949E]" /> : <ChevronDown size={16} className="text-[#8B949E]" />}
-            </div>
-            {expandedSections.threat && (
-              <div className="p-4 border-t border-[#30363D] text-xs text-[#E6EDF3] leading-relaxed">
-                {playbook.threat_summary}
+                <span
+                  className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1"
+                  style={{
+                    background: isCompleted ? 'rgba(34,197,94,0.20)' : isRunning ? 'rgba(237,158,88,0.20)' : 'rgba(233,188,185,0.12)',
+                    color: isCompleted ? '#22c55e' : isRunning ? '#ED9E58' : '#CBD5E1',
+                    border: `1px solid ${isCompleted ? 'rgba(34,197,94,0.40)' : isRunning ? 'rgba(237,158,88,0.40)' : 'rgba(233,188,185,0.25)'}`
+                  }}
+                >
+                  {isCompleted ? (
+                    <>
+                      <CheckCircle size={10} /> DONE
+                    </>
+                  ) : isRunning ? (
+                    <>
+                      <Loader2 size={10} className="animate-spin" /> RUNNING
+                    </>
+                  ) : (
+                    <>
+                      <Clock size={10} /> WAITING
+                    </>
+                  )}
+                </span>
               </div>
-            )}
-          </div>
 
-          {/* 3. Patch Recommendation & Command */}
-          <div className="bg-[#0D1117] border border-[#30363D] rounded-xl overflow-hidden">
-            <div
-              onClick={() => toggleSection('patch')}
-              className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#161B22] transition-colors select-none"
-            >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#3B82F6]">
-                Patch & Upgrade Target
-              </span>
-              {expandedSections.patch ? <ChevronUp size={16} className="text-[#8B949E]" /> : <ChevronDown size={16} className="text-[#8B949E]" />}
-            </div>
-            {expandedSections.patch && (
-              <div className="p-4 border-t border-[#30363D] space-y-3 text-xs">
-                <div className="flex items-center justify-between bg-[#161B22] p-3 rounded-lg border border-[#30363D]">
-                  <span className="font-mono text-[#00C896] font-bold">{upgradeCmd}</span>
-                  <button
-                    onClick={handleCopyCommand}
-                    className="p-1.5 rounded bg-[#30363D] hover:bg-[#8B949E]/20 text-[#E6EDF3] transition-colors"
-                    title="Copy command"
-                  >
-                    {copiedCmd ? <Check size={14} className="text-[#00C896]" /> : <Copy size={14} />}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 4. Compliance Mapping Tags */}
-          <div className="bg-[#0D1117] border border-[#30363D] rounded-xl overflow-hidden">
-            <div
-              onClick={() => toggleSection('compliance')}
-              className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#161B22] transition-colors select-none"
-            >
-              <span className="text-xs font-bold uppercase tracking-wider text-[#F0A500]">
-                Compliance Standard Mappings
-              </span>
-              {expandedSections.compliance ? <ChevronUp size={16} className="text-[#8B949E]" /> : <ChevronDown size={16} className="text-[#8B949E]" />}
-            </div>
-            {expandedSections.compliance && (
-              <div className="p-4 border-t border-[#30363D] flex flex-wrap gap-2 text-xs">
-                <span className="px-2.5 py-1 rounded bg-[#3B82F6]/15 text-[#3B82F6] border border-[#3B82F6]/30 font-semibold">
-                  NIST CSF 2.0: PR.DS-06
-                </span>
-                <span className="px-2.5 py-1 rounded bg-[#E84040]/15 text-[#E84040] border border-[#E84040]/30 font-semibold">
-                  MITRE ATT&CK: T1195.001
-                </span>
-                <span className="px-2.5 py-1 rounded bg-[#F0A500]/15 text-[#F0A500] border border-[#F0A500]/30 font-semibold">
-                  OWASP Top 10: A06:2021
-                </span>
-                <span className="px-2.5 py-1 rounded bg-[#8B5CF6]/15 text-[#8B5CF6] border border-[#8B5CF6]/30 font-semibold">
-                  ISO 27001: A.8.19
-                </span>
-                <span className="px-2.5 py-1 rounded bg-[#00C896]/15 text-[#00C896] border border-[#00C896]/30 font-semibold">
-                  EU AI Act: Article 15 Compliant
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* 5. Evidence Citations */}
-          {playbook.evidence_citations && playbook.evidence_citations.length > 0 && (
-            <div className="bg-[#0D1117] border border-[#30363D] rounded-xl overflow-hidden">
-              <div
-                onClick={() => toggleSection('citations')}
-                className="p-3.5 flex items-center justify-between cursor-pointer hover:bg-[#161B22] transition-colors select-none"
-              >
-                <span className="text-xs font-bold uppercase tracking-wider text-[#8B949E]">
-                  Evidence Citations ({playbook.evidence_citations.length})
-                </span>
-                {expandedSections.citations ? <ChevronUp size={16} className="text-[#8B949E]" /> : <ChevronDown size={16} className="text-[#8B949E]" />}
-              </div>
-              {expandedSections.citations && (
-                <div className="p-4 border-t border-[#30363D] space-y-2 text-xs">
-                  {playbook.evidence_citations.map((cite, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-[#8B949E]">
-                      <span className="font-mono font-bold text-[#00C896]">{idx + 1}.</span>
-                      <span>{cite}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </motion.div>
-      )}
+              <h4 className="text-xs font-bold text-white mb-1 leading-tight font-['Plus_Jakarta_Sans']">{agent.name}</h4>
+              <p className="text-[10px] text-[#CBD5E1] leading-relaxed line-clamp-2 font-sans">{agent.role}</p>
+            </motion.div>
+          );
+        })}
+      </div>
     </div>
   );
 }

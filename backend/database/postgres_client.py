@@ -502,6 +502,9 @@ class PostgresClient:
 
         return self._scans.get(scan_id)
 
+    async def get_scan_status(self, scan_id: str) -> dict | None:
+        return await self.get_scan(scan_id)
+
     async def save_playbook(self, playbook: Playbook):
         pb_dict = playbook.model_dump()
         scan_id = playbook.scan_id

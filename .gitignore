@@ -31,3 +31,8 @@ ENV/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Backups & Temp
+frontend_backup_pre_redesign/
+*.zip
+
