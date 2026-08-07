@@ -218,12 +218,12 @@ export default function AttackReplayTimeline({ scanId, packages = [], cves = [] 
         <div className="p-3.5 bg-[rgba(34,197,94,0.12)] border border-[rgba(34,197,94,0.35)] rounded-xl text-xs font-mono text-[#22c55e] space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="font-bold flex items-center gap-1">
-              <GitPullRequest size={14} /> Pull Request #42 Created
+              <GitPullRequest size={14} /> Pull Request #1 Created
             </span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-[rgba(34,197,94,0.20)] text-[#22c55e] font-bold">CLOSED THREAT</span>
           </div>
           <a
-            href="https://github.com/threatmesh-ai/enterprise-app/pull/42"
+            href="https://github.com/Vansh-7758/NULLSTOP_ThreatMeshAI/pull/1"
             target="_blank"
             rel="noreferrer"
             className="text-white underline hover:text-[#ED9E58] block truncate font-bold flex items-center gap-1"
