@@ -128,9 +128,23 @@ export default function AIProductConfigModal({
 
           {/* Endpoint URL */}
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-[#E6EDF3] block">
-              AI Product Endpoint URL <span className="text-[#E84040]">*</span>
-            </label>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#E6EDF3] block">
+                AI Product Endpoint URL <span className="text-[#E84040]">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setEndpoint('https://threatmeshai.onrender.com/api/health');
+                  setApiKey('sk_live_demo_threatmesh_2026');
+                  setConsent(true);
+                  setError(null);
+                }}
+                className="text-[11px] font-bold text-[#00C896] hover:underline flex items-center gap-1"
+              >
+                ✨ Auto-Fill Demo Endpoint
+              </button>
+            </div>
             <input
               type="url"
               placeholder="https://api.yourcompany.com/v1/chat"
