@@ -606,16 +606,27 @@ class PostgresClient:
                 logger.warning(f"Fallback to in-memory PR save: {e}")
 
     async def get_pull_requests(self, scan_id: str) -> list[dict]:
+        raw_prs = []
         if self.pool:
             try:
                 query = "SELECT * FROM pull_requests WHERE scan_id = $1"
                 records = await self._execute_with_retry(query, scan_id)
                 if records:
-                    return [dict(r) for r in records]
+                    raw_prs = [dict(r) for r in records]
             except Exception as e:
                 logger.warning(f"Fallback to in-memory PR read: {e}")
 
-        return self._pull_requests.get(scan_id, [])
+        if not raw_prs:
+            raw_prs = self._pull_requests.get(scan_id, [])
+
+        clean_prs = []
+        for pr in raw_prs:
+            p = dict(pr)
+            url = p.get("pr_url", "")
+            if "threatmesh/repo" in url or "enterprise-app" in url or "threatmesh-ai/demo" in url:
+                p["pr_url"] = "https://github.com/Vansh-7758/NULLSTOP_ThreatMeshAI/pulls"
+            clean_prs.append(p)
+        return clean_prs
 
     async def save_governance_event(self, event: GovernanceEvent):
         evt_dict = event.model_dump()

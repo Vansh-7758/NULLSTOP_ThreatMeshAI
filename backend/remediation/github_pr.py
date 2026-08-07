@@ -129,8 +129,8 @@ def generate_pull_request(
     playbook_summary: str,
     scan_id: str
 ) -> PRResponse:
-    repo_owner = settings.GITHUB_REPO_OWNER or "Anshul-052"
-    repo_name = settings.GITHUB_REPO_NAME or "OrchestrateAi"
+    repo_owner = settings.GITHUB_REPO_OWNER or "Vansh-7758"
+    repo_name = settings.GITHUB_REPO_NAME or "NULLSTOP_ThreatMeshAI"
     pr_title = f"[ThreatMesh] Security fix — upgrade {package_name} from {old_version} to {new_version}"
     safe_pkg_name = package_name.lower().replace('/', '-').replace('@', '')
     safe_cve_id = cve_id.lower().replace(' ', '-')
