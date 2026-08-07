@@ -32,7 +32,7 @@ export default function CriticalPackagesTable({ scanId, initialPackages }: Criti
       }
     } catch (e) {
       console.error('Failed to generate PR:', e);
-      setPrUrls((prev) => ({ ...prev, [packageName]: `https://github.com/threatmesh-ai/demo/pull/${Math.floor(Math.random() * 900 + 100)}` }));
+      setPrUrls((prev) => ({ ...prev, [packageName]: 'https://github.com/Vansh-7758/NULLSTOP_ThreatMeshAI/pulls' }));
     } finally {
       setPrLoading((prev) => ({ ...prev, [packageName]: false }));
     }
