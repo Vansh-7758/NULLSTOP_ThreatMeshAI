@@ -217,8 +217,17 @@ Fixes **{cve_id}** for `{package_name}`.
         
     except Exception as e:
         logger.error(f"Failed to generate PR via GitHub API: {e}")
+        existing_pr_url = f"https://github.com/{repo_owner}/{repo_name}/pulls"
+        try:
+            g_repo = Github(settings.GITHUB_TOKEN).get_repo(f"{repo_owner}/{repo_name}")
+            pulls = g_repo.get_pulls(state='open', head=f"{repo_owner}:{branch_name}")
+            if pulls and pulls.totalCount > 0:
+                existing_pr_url = pulls[0].html_url
+        except Exception as err:
+            logger.warning(f"Could not retrieve existing PR URL: {err}")
+
         return PRResponse(
-            pr_url=local_file_url,
+            pr_url=existing_pr_url,
             pr_title=pr_title,
             branch_name=branch_name,
             package_name=package_name,
