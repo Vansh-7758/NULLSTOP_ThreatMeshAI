@@ -36,12 +36,16 @@ export default function ScanDetailPage() {
         getAttackPaths(scanId).catch(() => []),
         getPlaybooks(scanId).catch(() => [])
       ]);
-      setPackages(pkgs);
-      setAttackPaths(paths);
-      setPlaybooks(pbs);
+      const safePkgs = Array.isArray(pkgs) ? pkgs : [];
+      const safePaths = Array.isArray(paths) ? paths : [];
+      const safePbs = Array.isArray(pbs) ? pbs : [];
 
-      if (preSelectedPackageName && pkgs.length > 0) {
-        const found = pkgs.find((p) => p.name === preSelectedPackageName);
+      setPackages(safePkgs);
+      setAttackPaths(safePaths);
+      setPlaybooks(safePbs);
+
+      if (preSelectedPackageName && safePkgs.length > 0) {
+        const found = safePkgs.find((p) => p.name === preSelectedPackageName);
         if (found) setSelectedPackage(found);
       }
     } catch (e: any) {
@@ -63,8 +67,12 @@ export default function ScanDetailPage() {
     setSelectedPackage(null);
   };
 
+  const safePackages = Array.isArray(packages) ? packages : [];
+  const safeAttackPaths = Array.isArray(attackPaths) ? attackPaths : [];
+  const safePlaybooks = Array.isArray(playbooks) ? playbooks : [];
+
   // Find playbook for selected package
-  const selectedPlaybook = playbooks.find(
+  const selectedPlaybook = safePlaybooks.find(
     (pb) => selectedPackage && pb.package_name === selectedPackage.name
   );
 
@@ -107,8 +115,8 @@ export default function ScanDetailPage() {
         {/* Left Panel: Graph Canvas (60% width -> 6 cols) */}
         <div className="lg:col-span-6 h-full">
           <DependencyGraph
-            packages={packages}
-            attackPaths={attackPaths}
+            packages={safePackages}
+            attackPaths={safeAttackPaths}
             selectedPackageId={selectedPackage?.name}
             onPackageSelect={handlePackageSelect}
             loading={loading}
@@ -121,7 +129,7 @@ export default function ScanDetailPage() {
             <PackageSidePanel
               package={selectedPackage}
               scanId={scanId}
-              attackPaths={attackPaths}
+              attackPaths={safeAttackPaths}
               playbook={selectedPlaybook}
               onClose={handleCloseSidePanel}
             />
@@ -143,8 +151,8 @@ export default function ScanDetailPage() {
       <div className="w-full">
         <AttackReplayTimeline
           scanData={{
-            cve_count: packages.reduce((acc, p) => acc + (p.trust_score < 80 ? 1 : 0), 0),
-            lowest_trust_score: packages.length > 0 ? Math.min(...packages.map((p) => p.trust_score)) : 22,
+            cve_count: safePackages.reduce((acc, p) => acc + (p.trust_score < 80 ? 1 : 0), 0),
+            lowest_trust_score: safePackages.length > 0 ? Math.min(...safePackages.map((p) => p.trust_score)) : 22,
             target_package: selectedPackage?.name || 'log4j-core'
           }}
         />
