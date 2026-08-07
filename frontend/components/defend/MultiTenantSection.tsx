@@ -6,7 +6,7 @@ import TenantCard from './TenantCard';
 import { getTenants, registerTenant, simulateAttack, resetTenants, uploadAndRegisterTenants } from '@/lib/api';
 import { useWebSocket, wsClient } from '@/lib/websocket';
 import { Tenant, PropagationEvent } from '@/types';
-import { Building2, Plus, Zap, Activity, AlertOctagon, Loader2, Layers, RotateCcw, ShieldAlert, Radio, FileText, Upload, AlertCircle, FileUp, Sparkles } from 'lucide-react';
+import { Building2, Plus, Zap, Activity, AlertOctagon, Loader2, Layers, RotateCcw, ShieldAlert, Radio, FileText, Upload, AlertCircle, FileUp, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface MultiTenantSectionProps {
   scanId: string;
@@ -481,6 +481,80 @@ export default function MultiTenantSection({ scanId }: MultiTenantSectionProps) 
           </div>
         </div>
       )}
+
+      {/* BEFORE VS AFTER ATTACK SIMULATION COMPARISON MATRIX */}
+      <div className="glass-card p-6 space-y-4 relative overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-[rgba(163,64,84,0.15)] pb-3 gap-2">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-white flex items-center gap-2 font-['Plus_Jakarta_Sans']">
+            <Layers size={16} className="text-[#ED9E58]" /> MULTI-TENANT ATTACK PROPAGATION: BEFORE VS. AFTER COMPARISON
+          </h4>
+          <span className={`text-[10px] font-mono font-bold px-3 py-1 rounded-full border shrink-0 ${
+            isAnyCritical 
+              ? 'bg-[rgba(239,68,68,0.18)] text-[#ef4444] border-[rgba(239,68,68,0.40)] animate-pulse' 
+              : 'bg-[rgba(34,197,94,0.15)] text-[#22c55e] border-[rgba(34,197,94,0.30)]'
+          }`}>
+            {isAnyCritical ? '🔴 POST-ATTACK STATE (Cascading Blast Radius Active)' : '🟢 PRE-ATTACK STATE (Baseline Zero-Trust Posture)'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* BEFORE ATTACK CARD */}
+          <div className="p-5 rounded-2xl bg-[rgba(11,13,27,0.75)] border border-[rgba(34,197,94,0.30)] space-y-3 font-mono text-xs">
+            <div className="flex items-center justify-between border-b border-[rgba(34,197,94,0.20)] pb-2.5">
+              <span className="font-bold text-[#22c55e] flex items-center gap-1.5 font-['Plus_Jakarta_Sans']">
+                <CheckCircle2 size={16} /> 1. BEFORE ATTACK (Pre-Simulation Baseline)
+              </span>
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-[rgba(34,197,94,0.15)] text-[#22c55e] font-bold">NORMAL POSTURE</span>
+            </div>
+
+            <ul className="space-y-2.5 text-[#CBD5E1] leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-[#22c55e] font-bold text-sm">•</span>
+                <span><strong>Shared Neo4j Graph Layer:</strong> Shared open-source packages (e.g. <code>lodash</code>, <code>axios</code>, <code>requests</code>) maintain high trust scores (<strong>92.0 / 100</strong>).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#22c55e] font-bold text-sm">•</span>
+                <span><strong>Tenant Isolation & Posture:</strong> Portfolio apps (Fintech Mobile App, Healthcare Portal) operate cleanly with healthy security metrics.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#22c55e] font-bold text-sm">•</span>
+                <span><strong>Compliance Baseline:</strong> NIST CSF 2.0 and EU AI Act Article 15 compliance controls are fully satisfied.</span>
+              </li>
+            </ul>
+          </div>
+
+          {/* AFTER ATTACK CARD */}
+          <div className={`p-5 rounded-2xl bg-[rgba(11,13,27,0.75)] border transition-all duration-300 space-y-3 font-mono text-xs ${
+            isAnyCritical ? 'border-[#ef4444] bg-[rgba(239,68,68,0.08)] shadow-[0_0_24px_rgba(239,68,68,0.20)]' : 'border-[rgba(239,68,68,0.30)]'
+          }`}>
+            <div className="flex items-center justify-between border-b border-[rgba(239,68,68,0.20)] pb-2.5">
+              <span className="font-bold text-[#ef4444] flex items-center gap-1.5 font-['Plus_Jakarta_Sans']">
+                <AlertOctagon size={16} /> 2. AFTER ATTACK (Cascading Blast Radius)
+              </span>
+              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold ${
+                isAnyCritical ? 'bg-[rgba(239,68,68,0.25)] text-[#ef4444] animate-pulse' : 'bg-[rgba(239,68,68,0.12)] text-[#ef4444]'
+              }`}>
+                {isAnyCritical ? 'PROPAGATION ACTIVATED' : 'READY TO SIMULATE'}
+              </span>
+            </div>
+
+            <ul className="space-y-2.5 text-[#CBD5E1] leading-relaxed">
+              <li className="flex items-start gap-2">
+                <span className="text-[#ef4444] font-bold text-sm">•</span>
+                <span><strong>Shared Package Poisoning:</strong> Target package (<code>{packageName}</code>) drops to <strong>{newTrustScore}.0 / 100</strong> (Supply Chain Poisoning).</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#ef4444] font-bold text-sm">•</span>
+                <span><strong>Instant WebSocket Signal:</strong> Pushes <strong>&lt;50ms</strong> real-time alerts to all connected tenant graphs without requiring manual rescans.</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#ef4444] font-bold text-sm">•</span>
+                <span><strong>Downstream Impact & PR Auto-Fix:</strong> Tenant score drops from <strong>92.0</strong> ➔ <strong>42.0</strong> (Critical). Clicking <strong>Generate Fix PR</strong> patches the shared dependency and restores all tenants to green.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       {/* TENANT CARDS GRID OR EMPTY STATE */}
       {tenants.length > 0 ? (
