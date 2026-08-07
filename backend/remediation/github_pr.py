@@ -10,14 +10,15 @@ from config import settings
 logger = logging.getLogger(__name__)
 
 def _detect_manifest(package_name: str, ecosystem: str) -> Tuple[str, str]:
-    if ecosystem.lower() == "npm":
-        return "package.json", "json"
-    elif ecosystem.lower() == "pypi":
-        return "requirements.txt", "txt"
-    elif ecosystem.lower() == "maven":
-        return "pom.xml", "xml"
+    eco_lower = ecosystem.lower()
+    pkg_lower = package_name.lower()
+
+    if eco_lower == "pypi" or pkg_lower in ["requests", "urllib3", "flask", "django", "numpy", "pillow", "pyyaml", "langchain", "chromadb"]:
+        return "manifests/requirements.txt", "txt"
+    elif eco_lower == "maven" or pkg_lower in ["log4j-core", "spring-core", "struts2-core", "jackson-databind"]:
+        return "manifests/pom.xml", "xml"
     else:
-        return "package.json", "json"
+        return "manifests/package.json", "json"
 
 def _update_manifest_content(content: str, package_name: str, old_version: str, new_version: str, manifest_type: str) -> str:
     if manifest_type == "json":

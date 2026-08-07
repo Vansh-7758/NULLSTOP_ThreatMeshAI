@@ -9,18 +9,19 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=[".env", "../.env"],
         env_file_encoding="utf-8",
         extra="ignore",
     )
 
     # AI / LLM
     ANTHROPIC_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
 
     # GitHub
     GITHUB_TOKEN: str = ""
-    GITHUB_REPO_OWNER: str = "Anshul-052"
-    GITHUB_REPO_NAME: str = "OrchestrateAi"
+    GITHUB_REPO_OWNER: str = "Vansh-7758"
+    GITHUB_REPO_NAME: str = "NULLSTOP_ThreatMeshAI"
 
     # Threat Intel
     NVD_API_KEY: str = ""
